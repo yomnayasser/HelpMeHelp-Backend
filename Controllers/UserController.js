@@ -5,22 +5,30 @@ exports.GetUser=function(req,res){
     const username=req.body.username;
     const pass=req.body.password;
     User.findbyID(username)
-    .then((user)=>{
-        if(!user)
+    .then(([user])=>{
+        if(!user[0])
         {
-            return res.status(400).json({message:"not found" });
+             res.status(400).json({message:"not found" });
         }
-        bcrypt.compare(pass,user.password)
-        .then((Match)=>{
-            if(Match)
-            {
-                //const loggedInUser=new User(user.name,user.username,user.password,user.country,user.Governorate,user.email,user.age,user.address,user.birthday,user.role);
-                //maza ba3d? 
-                return res.status(200).json({ message:"you are logged in"});                  
-            }
-            res.status(400).json({message:"wrong password"});
-        })
-        .catch(err=> console.log(err));
+        else
+        {
+            bcrypt.compare(pass,user[0].Password)
+            .then(doMatch =>{
+                if(doMatch)
+                {
+                    //const loggedInUser=new User(user.name,user.username,user.password,user.country,user.Governorate,user.email,user.age,user.address,user.birthday,user.role);
+                    //maza ba3d? 
+                     res.status(200).json({ message:"you are logged in"});                  
+                };
+            
+                res.status(400).json({message:"wrong password"});
+            })
+            .catch(err=> console.log(err));
+        }
+       
+            
+      
+       
     })
     .catch(err=> console.log(err));
 }
