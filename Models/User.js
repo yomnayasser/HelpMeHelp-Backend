@@ -43,7 +43,7 @@ class User extends account
     }
     updateProfile(username)
     {
-        return db.execute('UPDATE user SET Name=?,Password=?,Email=?,Age=?,Address=?,BirthDate=?,country_ID=?,GovernorateID=? where username=?',[this.name,this.password,this.email,this.age,this.address,this.birthday,this.country,this.Governorate,username]);
+        return db.execute('UPDATE user SET Name=?,Password=?,Email=?,Age=?,Address=?,BirthDate=?,countryID=?,GovernorateID=? where username=?',[this.name,this.password,this.email,this.age,this.address,this.birthday,this.country,this.Governorate,username]);
     }
     rateCampaign(id,rate)
     {
