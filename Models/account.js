@@ -11,7 +11,7 @@ class account
         this.email=email;
       //  this.registerStrategy=registerStrategy;
     }
-    login()
+    login(userName,password)
     {
         throw new Error("Abstract Method has no implementation");
     }
