@@ -3,7 +3,6 @@ var OrgRouter = express.Router();
 const OrganizationController=require('../Controllers/OrganizationController');
 OrgRouter.get('/OrgLogin',OrganizationController.OrgLogIn);
 OrgRouter.get('/OrgProfile',OrganizationController.OrgProfile);
-// OrgRouter.get('/OrgC',OrganizationController.getCategory);
-// router.post('/user/:id',userCotnroller.PostUpdatedUser);
+OrgRouter.post('/org/:id',OrganizationController.UpdatePorfile);
 
 module.exports=OrgRouter;
