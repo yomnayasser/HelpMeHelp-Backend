@@ -13,20 +13,20 @@ exports.OrgLogIn=function(req,res)
         }
         else
         {
-            // bcrypt.compare(pass,Org.password)
-            // .then(doMatch =>{
-            //     if(doMatch)
-            //     {
-            //          res.status(200).json({ message:"Log in successfully"});            
-            //     };
-            //     res.status(400).json({message:"wrong password"});
-            // })
-            // .catch(err=> console.log(err));
-            if(password==Org[0].password)
-            {
-                res.status(200).json({ message:"Log in successfully"});  
-            };
-            res.status(400).json({message:"wrong password"});
+            bcrypt.compare(password,Org[0].password)
+            .then(doMatch =>{
+                if(doMatch)
+                {
+                     res.status(200).json({ message:"Log in successfully"});            
+                };
+                res.status(400).json({message:"wrong password"});
+            })
+            .catch(err=> console.log(err));
+            // if(password==Org[0].password)
+            // {
+            //     res.status(200).json({ message:"Log in successfully"});  
+            // };
+            // res.status(400).json({message:"wrong password"});
         }
     })
     .catch(err=> console.log(err))
