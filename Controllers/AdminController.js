@@ -1,4 +1,5 @@
 const Admin=require('../Models/admin');
+const Organization = require('../Models/Organization');
 const organization=require('../Models/Organization')
 exports.PostAddHotline= function(req,res){
     const number=req.body.number;
@@ -39,18 +40,39 @@ exports.PostAddAdmin=function(req,res){
     })
     .catch(err=> console.log(err));
 }
+exports.getAllOrganizationsInfo=function(req,res){
+    var allOrgArr=[];
+    Admin.GetOrganizations().then(([allOrg])=>{
+        for(let i=0;i<allOrg.length;i++)
+        {
+            Admin.getOrganizationInfo(allOrg[i].username).then((Org)=>{
+                allOrgArr.push(Org);
+                if(i==allOrg.length-1)
+                {
+                    res.json(allOrgArr);
+                    return allOrgArr;
+                }
+            })
+        }
+    })
+    .catch(err=> console.log(err));
+}
 exports.ViewAllPendings=function(req,res){
-    Admin.viewAllPendingOrganizations()
-    .then(([allOrg])=>{
-
-        // var PendingArr=new Array();
-        // for (let i=0;i<allOrg.length;i++)
-        // {
-        //     PendingArr.push(allOrg[i].username);
-        // }
-        
-        res.json(allOrg);
-    });
+    var allOrgArr=[];
+    Admin.viewAllPendingOrganizations().then(([allOrg])=>{
+        for(let i=0;i<allOrg.length;i++)
+        {
+            Admin.getOrganizationInfo(allOrg[i].username).then((Org)=>{
+                allOrgArr.push(Org);
+                if(i==allOrg.length-1)
+                {
+                    res.json(allOrgArr);
+                    return allOrgArr;
+                }
+            })
+        }
+    })
+    .catch(err=> console.log(err));
 }
 exports.ApproveOrganization=function(req,res){
     const org_username=req.body.username;
