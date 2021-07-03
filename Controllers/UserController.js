@@ -1,6 +1,57 @@
 const bcrypt = require('bcryptjs');
 const User=require('../Models/User');
 
+/*exports.history=function(req,res){
+    const username=req.body.username;
+    User.get_donation_history(username)
+    .then((hist)=>{
+        res.status(200).json({message:'history done'});
+        console.log(hist);
+    })
+    .catch(err=>console.log(err));
+}*/
+/*exports.approve=function(req,res){
+    const campid=req.body.campid;
+    const username=req.body.username;
+    const date=req.body.date;
+    User.approveJoinRequest(campid,username,date)
+    .then(()=>{
+        res.status(200).json({message:'approve done'});
+    })
+    .catch(err=>console.log(err));
+}*/
+exports.join=function(req,res){
+    const campid=req.body.campid;
+    const username=req.body.username;
+    const userstate=req.body.userstate;
+    User.joinCampaign(campid,username,userstate)
+    .then(()=>{
+        res.status(200).json({message:'join done'});
+    })
+    .catch(err=>console.log(err));
+}
+exports.donate=function(req,res){
+    const campid=req.body.campid;
+    const username=req.body.username;
+    const amount=req.body.amount;
+    const date=req.body.date;
+    User.donate(amount,campid,username,date)
+    .then(()=>{
+        res.status(200).json({message:'donation done'});
+    })
+    .catch(err=>console.log(err));
+}
+exports.addUserRate=function(req,res){
+    const campaign_id=req.body.org_username;
+    const rate=req.body.rate;
+    const username=req.body.username;
+    User.rateCampaign(campaign_id,rate,username)
+    .then(()=>{
+        res.status(200).json({message:'rating done'});
+    })
+    .catch(err=>console.log(err));
+}
+
 exports.GetUser=function(req,res){
     const username=req.body.username;
     const pass=req.body.password;

@@ -155,6 +155,16 @@ class Organization extends account
         return true;
         
     }
+    static get_rate(username)
+    {
+        return db.execute('select rating from organization where Username =? ',
+        [username]);
+    }
+    static set_updated_rate(username,rate)
+    {
+        return db.execute('update organization set rating=? where Username=? ',
+        [rate,username]);
+    }
     calculateRating()
     {
 
