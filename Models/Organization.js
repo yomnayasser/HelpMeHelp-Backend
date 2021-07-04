@@ -1,5 +1,6 @@
 const account=require("./account");
 var db=require('../Database/connection');
+const smartSearch = require('smart-search')
 class Organization extends account
 {
     constructor(name,userName,password,country,Governorate,email,category,subCategory,organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location)
@@ -165,6 +166,27 @@ class Organization extends account
         return db.execute('update organization set rating=? where Username=? ',
         [rate,username]);
     }
+    static search(startRow,rowCount,text)
+    {
+        let promise= db.execute('select * from organization limit ?,?',
+        [startRow,rowCount]);
+        promise.then((rows)=>{
+            const organizations=rows[0]; 
+            const entries = organizations;
+            var patterns = [text];
+            var fields = { name: true, description: true ,purpose:true };
+            var results = smartSearch(entries, patterns, fields);
+            console.log(results);
+        })
+        .catch(err=> console.log(err));
+        return promise;
+    }
+    signup()
+    {
+        return db.execute('UPDATE organization SET name=?,password=?,description=?,purpose=?,website=?,rating=?,logo=?,email=?,request=?,phone_num=? where Username=?',
+        [this.name,this.password,this.description,this.purpose,this.website,this.rating,this.logo,this.email,this.requestStatus,this.phoneNumber,username])
+    }
+
     calculateRating()
     {
 

@@ -1,5 +1,6 @@
 const { decodeBase64 } = require("bcryptjs");
 var db=require('../Database/connection');
+const smartSearch = require('smart-search')
 
 class campaign {
     constructor(ID,name,status,ownerID,ownerType,address,description,startDate,endDate,process,rating,image,LaunchingCampaignStrategy,campaignFactory){
@@ -54,6 +55,21 @@ class campaign {
     static add_donation_campaign()
     {
         
+    }
+    static search(startRow,rowCount,text)
+    {
+        let promise= db.execute('select * from campaign limit ?,?',
+        [startRow,rowCount]);
+        promise.then((rows)=>{
+            const campaigns=rows[0]; 
+            const entries = campaigns;
+            var patterns = [text];
+            var fields = { Name: true, Description: true };
+            var results = smartSearch(entries, patterns, fields);
+            console.log(results);
+        })
+        .catch(err=> console.log(err));
+        return promise;
     }
     //calculateRating(double);
     //checkEnd();

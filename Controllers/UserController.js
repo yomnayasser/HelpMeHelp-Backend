@@ -1,6 +1,21 @@
 const bcrypt = require('bcryptjs');
 const User=require('../Models/User');
+const campaign=require("../Models/campaign");
+const org=require("../Models/Organization");
+const hotline=require("../Models/hotline");
 
+exports.search=function(req,res){
+    const startRow=req.body.startRow;
+    const rowCount=req.body.rowCount;
+    const text=req.body.text;
+    hotline.search(startRow,rowCount,text)
+    campaign.search(startRow,rowCount,text);
+    org.search(startRow,rowCount,text)
+    .then(()=>{
+        res.status(200).json({message:'search done'});       
+    })
+    .catch(err=>console.log(err));
+}
 /*exports.history=function(req,res){
     const username=req.body.username;
     User.get_donation_history(username)
