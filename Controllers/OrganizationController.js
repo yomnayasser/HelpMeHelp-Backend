@@ -14,19 +14,27 @@ exports.OrgLogIn=function(req,res)
         else
         {
             bcrypt.compare(password,Org[0].password)
-            .then(doMatch =>{
-                if(doMatch)
-                {
-                     res.status(200).json({ message:"Log in successfully"});            
-                };
-                res.status(400).json({message:"wrong password"});
-            })
-            .catch(err=> console.log(err));
-            // if(password==Org[0].password)
-            // {
-            //     res.status(200).json({ message:"Log in successfully"});  
-            // };
-            // res.status(400).json({message:"wrong password"});
+            .t // bcrypt.compare(password,Org[0].password)
+            // .then(doMatch =>{
+            //     if(doMatch)
+            //     {
+            //         res.send(true)          
+            //     }
+            //     else{
+            //         res.send(false)
+            //     }
+                
+            // })
+            // .catch(err=> console.log(err));
+
+               if(password==Org[0].password)
+            {
+                res.send(true)  
+            }
+            else
+            {
+                res.send(false)
+            }
         }
     })
     .catch(err=> console.log(err))
@@ -34,7 +42,7 @@ exports.OrgLogIn=function(req,res)
 
 exports.OrgProfile=async function(req,res)
 {
-    const username=req.body.username;
+    const username=req.params.id;
     const Org = new Organization();
     let categoryID;let categoryName; let name; let password;
     let description; let purpose; let website; let organizationTypeID;
@@ -129,11 +137,12 @@ exports.OrgProfile=async function(req,res)
         })
         .catch(err=> console.log(err))
     Org.name=name; Org.userName=username; Org.password=password;Org.country=countryName; Org.Governorate=GovernorateName;
-    Org.Subcategory=SubcategoryName; Org.category=categoryName;
+    Org.Subcategory=SubcategoryName; Org.category=categoryName; Org.email=email
    Org.organizationType=organizationTypeName; Org.description=description; Org.purpose=purpose; Org.rating=rating;
    Org.website=website; Org.logo=logo; Org.requestStatus=requestStatus; Org.phoneNumber=phoneNumber; Org.location=locationArray;
    Org.hotline=hotlineTemp; Org.socialMedia=socailMediaLinksArray;
-   res.status(200).json({Org});
+   console.log(Org)
+   res.send(Org)
    
 }
 
@@ -179,11 +188,8 @@ exports.UpdatePorfile=async function(req,res)
             ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_logo,new_requestStatus,new_phoneNumber,new_location);
          
             updatedOrg.updateProfileData(org_Username)
-        .then(
-            res.status(200).json({
-                message:"User updated "
-            }))
-        .catch(err=> console.log(err));
+            .then(res.send(true))
+            .catch(err=> console.log(err));
 
         updatedOrg.updateLocations(org_Username,locationArray)
         updatedOrg.updateSocailMedia(org_Username,socailMediaLinksArray);
