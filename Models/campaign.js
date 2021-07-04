@@ -3,7 +3,7 @@ var db=require('../Database/connection');
 const smartSearch = require('smart-search')
 
 class campaign {
-    constructor(ID,name,status,ownerID,ownerType,address,description,startDate,endDate,process,rating,image,LaunchingCampaignStrategy,campaignFactory){
+    constructor(ID,name,status,ownerID,ownerType,address,description,startDate,endDate,progress,target,rating,image,LaunchingCampaignStrategy,campaignFactory){
         this.ID=ID;
         this.name=name;
         this.status=status;
@@ -13,11 +13,17 @@ class campaign {
         this.description=description;
         this.startDate=startDate;
         this.endDate=endDate;
-        this.process=process;
+        this.progress=progress;
+        this.target=target;
         this.rating=rating;
         this.image=image;
         this.LaunchingCampaignStrategy=LaunchingCampaignStrategy;
         this.campaignFactory=campaignFactory;
+    }
+    static getCampaginDeitals(campaign_id)
+    {
+        return db.execute('select * from campaign where Campaign_ID=?',
+        [campaign_id]);
     }
     static get_targetandprogress(campaign_id)
     {
