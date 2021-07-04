@@ -202,33 +202,49 @@ exports.UpdatePorfile=async function(req,res)
    
 }
 
-exports.getOrgCampaigns()=function(req,res)
+exports.getOrgCampaigns=function(req,res)
 {
     const username=req.params.id;
     const camp = new Campaign();
-    let name; let status; let ownerID; let ownerType; let address;let image;
+    let name; let status; let ownerID; let address;let image;
     let description; let startDate; let endDate; let progress;let target; let id;
-     
-    Organization.getOrgCampagin(username)
-    .then()
-    Campaign.getCampaginDeitals(username)
-    .then(([campaign])=>{
-        id=campaign[0].Campaign_ID;
-        name=campaign[0].Name;
-        status=campaign[0].Status;
-        ownerID=campaign[0].ownerID;
-        ownerType=campaign[0].ownerType;
-        address=campaign[0].Address;
-        image=campaign[0].Image;
-        description=campaign[0].Description;
-        startDate=campaign[0].StartDate;
-        endDate=campaign[0].EndDate;
-        progress=campaign[0].Progress;
-        target=campaign[0].Target;
-    })
-    .catch(err=> console.log(err))
-    camp.
+    var campaginsDeitals = new Array();
 
+     
+    Organization.getOrgCampaginID(username)
+    .then(([ID])=>{
+        console.log(ID[0])
+        // id=ID[0].Campaign_ID
+        for(let i=0;i<ID.length;i++)
+        {
+            id=ID[i].Campaign_ID;
+            console.log(id);
+            Campaign.getCampaginDeitals(id)
+            .then(([campaign])=>{
+                name=campaign[0].Name;
+                status=campaign[0].Status;
+                ownerID=campaign[0].ownerID;
+                address=campaign[0].Address;
+                image=campaign[0].Image;
+                description=campaign[0].Description;
+                startDate=campaign[0].StartDate;
+                endDate=campaign[0].EndDate;
+                progress=campaign[0].Progress;
+                target=campaign[0].Target;
+            })
+            .catch(err=> console.log(err))
+            camp.name=name; camp.status=status;camp.ownerID=username; camp.startDate=startDate;
+            camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
+            camp.image=image; camp.target=target;
+            campaginsDeitals.push(camp);
+           // res.send(camp)
+           
+        }
+    })
+    .catch(err=> console.log(err));
+   
+    res.send(campaginsDeitals)
+   //res.status(200).json(id);  
 
 
 }

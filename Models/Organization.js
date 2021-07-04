@@ -187,9 +187,9 @@ class Organization extends account
         [this.name,this.password,this.description,this.purpose,this.website,this.rating,this.logo,this.email,this.requestStatus,this.phoneNumber,username])
     }
 
-    static getOrgCampagin(username)
+    static getOrgCampaginID(username)
     {
-        return db.execute('select Campaign_ID from campaign where Org_username=?',[username]);
+        return db.execute('Select Campaign_ID from campaign where Org_username=?',[username]);
     }
     getPendingApplicants(username)
     {

@@ -4,8 +4,8 @@ const db=mysql.createConnection({
     host:'localhost',
     user:'root',
     // password:'sarafares1999',
+    database:'helpmehelpdp',
     // database:'helpmehelpdb',
-    database:'helpmehelp',
     password:'database',
 });
 
