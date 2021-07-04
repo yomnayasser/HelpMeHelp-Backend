@@ -1,0 +1,34 @@
+var db=require('../Database/connection');
+const Campaign=require('../Models/campaign')
+class recommender{
+
+    static getEmbedUser(username)
+    {
+        return db.execute('select embed_user from user_embed where username= ?',[username]);
+    }
+    static getAllEmbedCampaigns()
+    {
+        return db.execute('select campaign_embed from campaign_embed');
+    }
+    static getCampaignInfo(embedCampaign)
+    {
+        db.execute('select camapaign_ID from campaign_embed where camapaign_embed=?',[embedCampaign]).then((campaignID)=>{
+            return Campaign.getCampaginDeitals(campaignID);            
+        })
+    }
+    static getAllInteractions()
+    {
+        let date_ob = new Date();
+        // current date
+        // adjust 0 before single digit date
+        let date = ("0" + date_ob.getDate()).slice(-2);
+        // current month
+        let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+        // current year
+        let year = parseInt(date_ob.getFullYear())-1;
+
+        let currentDate=""+year + "-" + month + "-" + date;
+        return db.execute('select campEmbed,userEmbed,interactionType from interactions where date > ?',[currentDate]);
+    }
+}
+module.exports=recommender;
