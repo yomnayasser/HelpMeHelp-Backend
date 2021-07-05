@@ -2,14 +2,12 @@ const mysql=require('mysql2');
 
 const db=mysql.createConnection({
     host:'localhost',
-    user:'root',
-    // password:'sarafares1999',
-    database:'helpmehelpdp',
-    // database:'helpmehelp',
-    // password:'database',
-    database:'editeddb',
-    password:'project123',
-  
+    user:'root', 
+   database:'helpmehelpdp',
+   // database:'helpmehelp',
+    password:'database',
+   // password:'project123',
+   // password:'sarafares1999',
 });
 
 //connect to db
