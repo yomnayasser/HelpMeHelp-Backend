@@ -191,9 +191,14 @@ class Organization extends account
     {
         return db.execute('Select Campaign_ID from campaign where Org_username=?',[username]);
     }
-    getPendingApplicants(username)
+    
+    static changeStatusAccepted(ID,username)
     {
-        
+        return db.execute('UPDATE `approve` SET Userstate="Accepted" where CampaignID=? and Username=?',[ID,username]);
+    }
+    static changeStatusRejected(ID,username)
+    {
+        return db.execute('UPDATE `approve` SET Userstate="Rejected" where CampaignID=? and Username=?',[ID,username]);
     }
 
     calculateRating()

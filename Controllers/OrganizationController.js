@@ -1,8 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Organization=require('../Models/Organization');
 const Campaign=require('../Models/campaign');
-const campaign = require('../Models/campaign');
-
+const User=require('../Models/User');
 exports.OrgLogIn=function(req,res)
 {
     const username=req.body.username;
@@ -249,6 +248,88 @@ exports.getOrgCampaigns=function(req,res)
    //res.status(200).json(id);  
   
 }
+exports.getCampaginApplicants= function (req,res)
+{
+    const ID=req.params.id; let name; let country; let cID;
+    let Governorate; let gID; let email; let age; let address; 
+    let birthday; var pendingApplicants = new Array();
+
+      Campaign.getPendingApplicants(ID)
+    .then(([applicantsUsernames])=>{
+        for(let i=0;i<applicantsUsernames.length;i++)
+        {
+             User.findbyID(applicantsUsernames[i].Username)
+            .then(([applicants])=>{
+                //console.log(applicants);
+                var user = new User();
+                name=applicants[0].Name;
+                cID=applicants[0].countryID;
+                gID=applicants[0].governorateID;
+                email=applicants[0].email;
+                age=applicants[0].Age;
+                address=applicants[0].Address;
+                birthday=applicants[0].birthdate;
+               
+              
+
+                //  User.getUserGovernorate(gID)
+                // .then(([gname])=>{
+                //     Governorate=gname[0].Name;
+                // })
+                // .catch(err=> console.log(err));
+
+                user.name=name; user.email=email;  user.age=age; user.country=cID;
+                user.userName=applicantsUsernames[i].Username; user.Governorate=gID;
+                 user.address=address; user.birthday=birthday;
+                 console.log( user);
+
+                pendingApplicants.push(user)
+
+                if(i==applicantsUsernames.length-1)
+                {
+                   console.log(pendingApplicants)
+                    res.send(pendingApplicants);
+                }
+               
+            })
+        }
+       
+    })
+    .catch(err=> console.log(err));
+}
+
+exports.acceptApplicants= function (req,res)
+{
+    const ID=req.params.id;
+    const username=req.params.username;
+    console.log(ID)
+    console.log(username)
+    Organization.changeStatusAccepted(ID,username)
+    .then(res.send(true))
+    .catch(err=> console.log(err));
+}
+
+exports.rejectApplicants= function (req,res)
+{
+    const ID=req.params.id;
+    const username=req.params.username;
+    Organization.changeStatusRejected(ID,username)
+    .then(res.send(true))
+    .catch(err=> console.log(err));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // exports.getLocation=function(req,res)
 // {
