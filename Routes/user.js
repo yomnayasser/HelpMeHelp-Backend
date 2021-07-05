@@ -9,4 +9,5 @@ router.post('/join',userCotnroller.join);
 //router.post('/approve',userCotnroller.approve);
 //router.get('/history',userCotnroller.history);
 router.get('/search',userCotnroller.search);
+//router.post('/chat',userCotnroller.getOldMessages);
 module.exports=router;

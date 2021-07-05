@@ -1,5 +1,6 @@
 const { decodeBase64 } = require("bcryptjs");
 var db=require('../Database/connection');
+var arabicNameToEn = require("arabic-name-to-en")
 const smartSearch = require('smart-search')
 
 class campaign {
@@ -67,7 +68,12 @@ class campaign {
         let promise= db.execute('select * from campaign limit ?,?',
         [startRow,rowCount]);
         promise.then((rows)=>{
-            const campaigns=rows[0]; 
+            const campaigns=rows[0];
+            for(let i=0;i<campaigns.length;i++)
+            {
+                campaigns[i].Name=arabicNameToEn(campaigns[i].Name);
+            } 
+            //console.log(campaigns);
             const entries = campaigns;
             var patterns = [text];
             var fields = { Name: true, Description: true };

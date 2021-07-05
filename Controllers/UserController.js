@@ -3,14 +3,56 @@ const User=require('../Models/User');
 const campaign=require("../Models/campaign");
 const org=require("../Models/Organization");
 const hotline=require("../Models/hotline");
+const chat=require("../Models/chat");
+var arabicNameToEn = require("arabic-name-to-en")
 
+/*exports.getOldMessages=function(req,res){
+    const chatID=req.body.chatID;
+    const chatType=req.body.chatType;
+    chat.get_old_messages(chatType,chatID)
+    .then(([messages])=>{
+        res.status(200).json({message:'message returned'});
+        console.log(messages[0].Text);
+    })
+    .catch(err=>console.log(err));
+}*/
+/*exports.saveMessage=function(req,res){
+    const message=req.body.message;
+    const sender=req.body.sender;
+    const chatID=req.body.chatID;
+    const chatType=req.body.chatType;
+    const senderType=req.body.senderType;
+    chat.save_message(message,sender,chatID,chatType,senderType)
+    .then(()=>{
+        res.status(200).json({message:'message done'});
+        //console.log(messages);
+    })
+    .catch(err=>console.log(err));
+}*/
+/*exports.chat=function(req,res){
+    const sender=req.body.sender;
+    const reciever=req.body.reciever;
+    const chatType=req.body.chatType;
+    chat.add_chat(sender,reciever,chatType)
+    .then(()=>{
+        res.status(200).json({message:'chat done'});
+        chat.get_id(sender,reciever,chatType)
+        .then(([Chat_ID])=>{
+            console.log(Chat_ID[0].Chat_ID);
+        })
+        .catch(err=>console.log(err));
+    })
+    .catch(err=>console.log(err));
+}*/
 exports.search=function(req,res){
     const startRow=req.body.startRow;
     const rowCount=req.body.rowCount;
-    const text=req.body.text;
-    hotline.search(startRow,rowCount,text)
-    campaign.search(startRow,rowCount,text);
-    org.search(startRow,rowCount,text)
+    const arabic_text=req.body.text;
+    const text=arabicNameToEn(arabic_text);
+    console.log(text);
+    //hotline.search(startRow,rowCount,text)
+    //org.search(startRow,rowCount,text);
+    campaign.search(startRow,rowCount,text)
     .then(()=>{
         res.status(200).json({message:'search done'});       
     })
