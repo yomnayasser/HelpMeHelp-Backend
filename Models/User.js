@@ -25,11 +25,11 @@ class User extends account
     }
     static getUserCountry(countryID)
     {
-        return db.execute('select name from country where countryID= ?',[countryID]);
+        return db.execute('select Name from country where ID= ?',[countryID]);
     }
     static getUserGovernorate(governorateID)
     {
-        return db.execute('select name from governorate where governorateID= ?',[governorateID]);
+        return db.execute('select Name from governorate where ID= ?',[governorateID]);
     }
     static rateCampaign(org_username,rate,username)
     {
