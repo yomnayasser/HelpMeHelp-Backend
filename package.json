@@ -12,6 +12,7 @@
     "arabic-name-to-en": "^1.0.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "cryptr": "^6.0.2",
     "express": "^4.17.1",
     "maz-smart-search": "^1.0.0",
     "mysql": "^2.18.1",
