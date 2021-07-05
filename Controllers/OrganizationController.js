@@ -199,7 +199,6 @@ exports.UpdatePorfile=async function(req,res)
 exports.getOrgCampaigns=function(req,res)
 {
     const username=req.params.id;
-    const camp = new Campaign();
     let name; let status; let ownerID; let address;let image;
     let description; let startDate; let endDate; let progress;let target; let id;
     var campaginsDeitals = new Array();
@@ -215,7 +214,8 @@ exports.getOrgCampaigns=function(req,res)
             console.log(id);
             Campaign.getCampaginDeitals(id)
             .then(([campaign])=>{
-                name=campaign[0].Name;
+                var camp = new Campaign();
+                name=campaign[0].name;
                 status=campaign[0].Status;
                 ownerID=campaign[0].ownerID;
                 address=campaign[0].Address;
@@ -225,22 +225,22 @@ exports.getOrgCampaigns=function(req,res)
                 endDate=campaign[0].EndDate;
                 progress=campaign[0].Progress;
                 target=campaign[0].Target;
+
+                camp.name=name; camp.status=status;camp.ownerID=username; camp.startDate=startDate;
+                camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
+                camp.image=image; camp.target=target;
+                campaginsDeitals.push(camp); 
+                if(i==ID.length-1)
+                {
+                    res.send(campaginsDeitals);
+                }
             })
-            .catch(err=> console.log(err))
-            camp.name=name; camp.status=status;camp.ownerID=username; camp.startDate=startDate;
-            camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-            camp.image=image; camp.target=target;
-            campaginsDeitals.push(camp);
-           // res.send(camp)
-           
+            .catch(err=> console.log(err))        
         }
+        // return res.send(campaginsDeitals)
     })
     .catch(err=> console.log(err));
-   
-    res.send(campaginsDeitals)
    //res.status(200).json(id);  
-
-
 }
 
 // exports.getLocation=function(req,res)
