@@ -15,20 +15,26 @@ exports.OrgLogIn=function(req,res)
         }
         else
         {
-            bcrypt.compare(password,Org[0].password)
-            .then(doMatch =>{
-                if(doMatch)
-                {
-                     res.status(200).json({ message:"Log in successfully"});            
-                };
-                res.status(400).json({message:"wrong password"});
-            })
-            .catch(err=> console.log(err));
-            // if(password==Org[0].password)
-            // {
-            //     res.status(200).json({ message:"Log in successfully"});  
-            // };
-            // res.status(400).json({message:"wrong password"});
+            // bcrypt.compare(password,Org[0].password)
+            // .then(doMatch =>{
+            //     if(doMatch)
+            //     {
+            //         res.send(true)          
+            //     }
+            //     else{
+            //         res.send(false)
+            //     }
+                
+            // })
+            // .catch(err=> console.log(err));
+            if(password==Org[0].password)
+            {
+                res.send(true)  
+            }
+            else
+            {
+                res.send(false)
+            }
         }
     })
     .catch(err=> console.log(err))
@@ -135,7 +141,8 @@ exports.OrgProfile=async function(req,res)
    Org.organizationType=organizationTypeName; Org.description=description; Org.purpose=purpose; Org.rating=rating;
    Org.website=website; Org.logo=logo; Org.requestStatus=requestStatus; Org.phoneNumber=phoneNumber; Org.location=locationArray;
    Org.hotline=hotlineTemp; Org.socialMedia=socailMediaLinksArray;
-   res.status(200).json({Org});
+   console.log(Org)
+   res.send(Org)
    
 }
 
@@ -181,11 +188,8 @@ exports.UpdatePorfile=async function(req,res)
             ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_logo,new_requestStatus,new_phoneNumber,new_location);
          
             updatedOrg.updateProfileData(org_Username)
-        .then(
-            res.status(200).json({
-                message:"User updated "
-            }))
-        .catch(err=> console.log(err));
+            .then(res.send(true))
+            .catch(err=> console.log(err));
 
         updatedOrg.updateLocations(org_Username,locationArray)
         updatedOrg.updateSocailMedia(org_Username,socailMediaLinksArray);
@@ -199,23 +203,23 @@ exports.UpdatePorfile=async function(req,res)
 exports.getOrgCampaigns=function(req,res)
 {
     const username=req.params.id;
-    let name; let status; let ownerID; let address;let image;
+    let name; let status; let ownerID; let address;let image; let campID;
     let description; let startDate; let endDate; let progress;let target; let id;
     var campaginsDeitals = new Array();
 
      
     Organization.getOrgCampaginID(username)
     .then(([ID])=>{
-        console.log(ID[0])
+        //console.log(ID.length)
         // id=ID[0].Campaign_ID
         for(let i=0;i<ID.length;i++)
         {
             id=ID[i].Campaign_ID;
-            console.log(id);
+            //console.log(id);
             Campaign.getCampaginDeitals(id)
             .then(([campaign])=>{
                 var camp = new Campaign();
-                name=campaign[0].name;
+                name=campaign[0].Name;
                 status=campaign[0].Status;
                 ownerID=campaign[0].ownerID;
                 address=campaign[0].Address;
@@ -228,19 +232,22 @@ exports.getOrgCampaigns=function(req,res)
 
                 camp.name=name; camp.status=status;camp.ownerID=username; camp.startDate=startDate;
                 camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-                camp.image=image; camp.target=target;
+                camp.image=image; camp.target=target; camp.ID=ID[i].Campaign_ID;
                 campaginsDeitals.push(camp); 
+                //console.log(campaginsDeitals.length)
                 if(i==ID.length-1)
                 {
+                   console.log(campaginsDeitals)
                     res.send(campaginsDeitals);
                 }
             })
             .catch(err=> console.log(err))        
         }
-        // return res.send(campaginsDeitals)
+        // res.send(campaginsDeitals)
     })
     .catch(err=> console.log(err));
    //res.status(200).json(id);  
+  
 }
 
 // exports.getLocation=function(req,res)
