@@ -186,3 +186,15 @@ exports.getGovFromID= function (req,res)
     })
     .catch(err=> console.log(err));
 }
+
+exports.getUserCampaginContributions= function (req,res)
+{
+    const username=req.params.id;
+    let ids;
+    campaign.getUserCampaigns(username)
+    .then(([IDS])=>{
+        ids=IDS[0].Campaign_ID;
+        res.send({ids})    
+    })
+    .catch(err=> console.log(err));
+}

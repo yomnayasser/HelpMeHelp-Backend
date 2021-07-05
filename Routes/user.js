@@ -14,5 +14,6 @@ router.get('/search',userCotnroller.search);
 
 router.get('/userCountry/:id',userCotnroller.getCountryFromID);
 router.get('/userGov/:id',userCotnroller.getGovFromID);
+router.get('/userCampagins/:id',userCotnroller.getUserCampaginContributions)
 
 module.exports=router;

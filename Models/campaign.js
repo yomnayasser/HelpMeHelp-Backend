@@ -89,6 +89,11 @@ class campaign {
         return db.execute('Select Username from `approve` where CampaignID=? and Userstate="Pending"',[ID]);
     }
 
+    static getUserCampaigns(username)
+    {
+        return db.execute('Select Campaign_ID from `join` where Username=?',[username]);
+    }
+
 
     //calculateRating(double);
     //checkEnd();
