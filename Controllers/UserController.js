@@ -161,3 +161,28 @@ exports.PostUpdatedUser=function(req,res){
     })
     .catch(err=> console.log(err));
 }
+
+exports.getCountryFromID= function (req,res)
+{
+    const ID=req.params.id;
+    let country;
+   User.getUserCountry(ID)
+    .then(([cname])=>{
+        country=cname[0].Name;
+        res.send(country)    
+    })
+    .catch(err=> console.log(err));
+}
+
+
+exports.getGovFromID= function (req,res)
+{
+    const ID=req.params.id;
+    let gov;
+   User.getUserGovernorate(ID)
+    .then(([gname])=>{
+        gov=gname[0].Name;
+        res.send({gov})    
+    })
+    .catch(err=> console.log(err));
+}

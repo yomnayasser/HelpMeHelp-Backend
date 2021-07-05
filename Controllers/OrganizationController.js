@@ -1,8 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Organization=require('../Models/Organization');
 const Campaign=require('../Models/campaign');
-const campaign = require('../Models/campaign');
-
+const User=require('../Models/User');
 exports.OrgLogIn=function(req,res)
 {
     const username=req.body.username;
@@ -15,20 +14,26 @@ exports.OrgLogIn=function(req,res)
         }
         else
         {
-            bcrypt.compare(password,Org[0].password)
-            .then(doMatch =>{
-                if(doMatch)
-                {
-                     res.status(200).json({ message:"Log in successfully"});            
-                };
-                res.status(400).json({message:"wrong password"});
-            })
-            .catch(err=> console.log(err));
-            // if(password==Org[0].password)
-            // {
-            //     res.status(200).json({ message:"Log in successfully"});  
-            // };
-            // res.status(400).json({message:"wrong password"});
+            // bcrypt.compare(password,Org[0].password)
+            // .then(doMatch =>{
+            //     if(doMatch)
+            //     {
+            //         res.send(true)          
+            //     }
+            //     else{
+            //         res.send(false)
+            //     }
+                
+            // })
+            // .catch(err=> console.log(err));
+            if(password==Org[0].password)
+            {
+                res.send(true)  
+            }
+            else
+            {
+                res.send(false)
+            }
         }
     })
     .catch(err=> console.log(err))
@@ -135,7 +140,8 @@ exports.OrgProfile=async function(req,res)
    Org.organizationType=organizationTypeName; Org.description=description; Org.purpose=purpose; Org.rating=rating;
    Org.website=website; Org.logo=logo; Org.requestStatus=requestStatus; Org.phoneNumber=phoneNumber; Org.location=locationArray;
    Org.hotline=hotlineTemp; Org.socialMedia=socailMediaLinksArray;
-   res.status(200).json({Org});
+   console.log(Org)
+   res.send(Org)
    
 }
 
@@ -181,11 +187,8 @@ exports.UpdatePorfile=async function(req,res)
             ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_logo,new_requestStatus,new_phoneNumber,new_location);
          
             updatedOrg.updateProfileData(org_Username)
-        .then(
-            res.status(200).json({
-                message:"User updated "
-            }))
-        .catch(err=> console.log(err));
+            .then(res.send(true))
+            .catch(err=> console.log(err));
 
         updatedOrg.updateLocations(org_Username,locationArray)
         updatedOrg.updateSocailMedia(org_Username,socailMediaLinksArray);
@@ -199,22 +202,22 @@ exports.UpdatePorfile=async function(req,res)
 exports.getOrgCampaigns=function(req,res)
 {
     const username=req.params.id;
-    const camp = new Campaign();
-    let name; let status; let ownerID; let address;let image;
+    let name; let status; let ownerID; let address;let image; let campID;
     let description; let startDate; let endDate; let progress;let target; let id;
     var campaginsDeitals = new Array();
 
      
     Organization.getOrgCampaginID(username)
     .then(([ID])=>{
-        console.log(ID[0])
+        //console.log(ID.length)
         // id=ID[0].Campaign_ID
         for(let i=0;i<ID.length;i++)
         {
             id=ID[i].Campaign_ID;
-            console.log(id);
+            //console.log(id);
             Campaign.getCampaginDeitals(id)
             .then(([campaign])=>{
+                var camp = new Campaign();
                 name=campaign[0].Name;
                 status=campaign[0].Status;
                 ownerID=campaign[0].ownerID;
@@ -225,23 +228,154 @@ exports.getOrgCampaigns=function(req,res)
                 endDate=campaign[0].EndDate;
                 progress=campaign[0].Progress;
                 target=campaign[0].Target;
+
+                camp.name=name; camp.status=status;camp.ownerID=username; camp.startDate=startDate;
+                camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
+                camp.image=image; camp.target=target; camp.ID=ID[i].Campaign_ID;
+                campaginsDeitals.push(camp); 
+                //console.log(campaginsDeitals.length)
+                if(i==ID.length-1)
+                {
+                   console.log(campaginsDeitals)
+                    res.send(campaginsDeitals);
+                }
             })
-            .catch(err=> console.log(err))
-            camp.name=name; camp.status=status;camp.ownerID=username; camp.startDate=startDate;
-            camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-            camp.image=image; camp.target=target;
-            campaginsDeitals.push(camp);
-           // res.send(camp)
-           
+            .catch(err=> console.log(err))        
         }
+        // res.send(campaginsDeitals)
     })
     .catch(err=> console.log(err));
-   
-    res.send(campaginsDeitals)
    //res.status(200).json(id);  
-
-
+  
 }
+
+exports.OrgSignUp=function(req,res)
+{
+    const name=req.body.name;
+    const userName=req.body.userName;
+    const password=req.body.password;
+    const country=req.body.country;
+    const Governorate=req.body.governorate;
+    const email=req.body.email;
+    const category=req.body.category;
+    const subCategory=req.body.subCategory; 
+    const organizationType=req.body.organizationType; 
+    const description=req.body.description;
+    const purpose=req.body.purpose;
+    const rating=req.body.rating;
+    const website=req.body.website;
+    const socialMedia=req.body.socialMedia; 
+    const hotline=[req.body.hotlineNumber,req.body.hotlineDesc]; 
+    const logo=req.body.logo;
+    const requestStatus="pending";
+    const location=req.body.location; 
+    const phoneNumber=req.body.phoneNumber;
+    const org=new Organization(name,userName,password,country,Governorate,email,category,subCategory,
+        organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location);
+        Organization.getOrg(userName).then(([found])=>{
+            if(found[0])
+            {
+                res.send("username already exists");
+            }
+            else
+            {
+                org.checkHotline().then(([exist])=>{
+                    if(exist[0])
+                    {
+                        res.send("hotline already exists");
+                    }
+                    else{
+                        org.register().then(res.send("user registered succesfully"));         
+                    }
+                }).catch(err=> console.log(err))
+            }
+        })
+        .catch(err=> console.log(err));
+}
+
+exports.getCampaginApplicants= function (req,res)
+{
+    const ID=req.params.id; let name; let country; let cID;
+    let Governorate; let gID; let email; let age; let address; 
+    let birthday; var pendingApplicants = new Array();
+
+      Campaign.getPendingApplicants(ID)
+    .then(([applicantsUsernames])=>{
+        for(let i=0;i<applicantsUsernames.length;i++)
+        {
+             User.findbyID(applicantsUsernames[i].Username)
+            .then(([applicants])=>{
+                //console.log(applicants);
+                var user = new User();
+                name=applicants[0].Name;
+                cID=applicants[0].countryID;
+                gID=applicants[0].governorateID;
+                email=applicants[0].email;
+                age=applicants[0].Age;
+                address=applicants[0].Address;
+                birthday=applicants[0].birthdate;
+               
+              
+
+                //  User.getUserGovernorate(gID)
+                // .then(([gname])=>{
+                //     Governorate=gname[0].Name;
+                // })
+                // .catch(err=> console.log(err));
+
+                user.name=name; user.email=email;  user.age=age; user.country=cID;
+                user.userName=applicantsUsernames[i].Username; user.Governorate=gID;
+                 user.address=address; user.birthday=birthday;
+                 console.log( user);
+
+                pendingApplicants.push(user)
+
+                if(i==applicantsUsernames.length-1)
+                {
+                   console.log(pendingApplicants)
+                    res.send(pendingApplicants);
+                }
+               
+            })
+        }
+       
+    })
+    .catch(err=> console.log(err));
+}
+
+exports.acceptApplicants= function (req,res)
+{
+    const ID=req.params.id;
+    const username=req.params.username;
+    console.log(ID)
+    console.log(username)
+    Organization.changeStatusAccepted(ID,username)
+    .then(res.send(true))
+    .catch(err=> console.log(err));
+}
+
+exports.rejectApplicants= function (req,res)
+{
+    const ID=req.params.id;
+    const username=req.params.username;
+    Organization.changeStatusRejected(ID,username)
+    .then(res.send(true))
+    .catch(err=> console.log(err));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // exports.getLocation=function(req,res)
 // {

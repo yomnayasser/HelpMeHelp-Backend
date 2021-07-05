@@ -186,14 +186,57 @@ class Organization extends account
         return db.execute('UPDATE organization SET name=?,password=?,description=?,purpose=?,website=?,rating=?,logo=?,email=?,request=?,phone_num=? where Username=?',
         [this.name,this.password,this.description,this.purpose,this.website,this.rating,this.logo,this.email,this.requestStatus,this.phoneNumber,username])
     }
-
+    checkHotline()
+    {
+        return db.execute('select * from hotline where Number= ?',[this.hotline[0]]);
+    }
+    register()
+    {
+    try{
+        return this.getCountryID(this.country).then(([countryID])=>{
+            this.getGovernorateID(this.Governorate).then(([governorateID])=>{
+                db.execute('insert into organization values(?,?,?,?,?,?,?,?,?,?,?,?,?)',[this.userName,this.name,this.password,this.description,this.purpose,this.website,this.rating,this.logo,this.email,this.requestStatus,this.phoneNumber,countryID[0].ID,governorateID[0].ID])
+                .then(db.execute('select id from category where name= ?',[this.category]).then(([id])=>{
+                    db.execute('insert into has_category values (?,?)',[this.userName,id[0].id]);
+                })).catch(err=> console.log(err))
+                .then(db.execute('select id from subcategory where name= ?',[this.subCategory]).then(([id])=>{
+                    db.execute('insert into has_subcategory values (?,?)',[this.userName,id[0].id]);
+                })).catch(err=> console.log(err))
+                .then(db.execute('select id from organization_Type where type= ?',[this.organizationType]).then(([id])=>{
+                    db.execute('insert into has_organization_type values (?,?)',[this.userName,id[0].id]);
+                })).catch(err=> console.log(err))
+                .then(db.execute('insert into hotline values (?,?,?)',[this.hotline[0],this.userName,this.hotline[1]]))
+                .then(()=>{
+                    for(let i=0;i<this.socialMedia.length;i++)
+                    {
+                        db.execute('insert into socialmedia values(?,?)',[this.userName,this.socialMedia[i]]);
+                    }
+                })
+                .then(()=>{
+                    for(let i=0;i<this.location.length;i++)
+                    {
+                        db.execute('insert into locations values(?,?)',[this.userName,this.location[i]]);
+                    }
+                })
+            })
+        })
+        }
+        catch(err){
+            err=> console.log(err);
+        }
+    }
     static getOrgCampaginID(username)
     {
         return db.execute('Select Campaign_ID from campaign where Org_username=?',[username]);
     }
-    getPendingApplicants(username)
+    
+    static changeStatusAccepted(ID,username)
     {
-        
+        return db.execute('UPDATE `approve` SET Userstate="Accepted" where CampaignID=? and Username=?',[ID,username]);
+    }
+    static changeStatusRejected(ID,username)
+    {
+        return db.execute('UPDATE `approve` SET Userstate="Rejected" where CampaignID=? and Username=?',[ID,username]);
     }
 
     calculateRating()

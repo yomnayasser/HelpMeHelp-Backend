@@ -83,6 +83,13 @@ class campaign {
         .catch(err=> console.log(err));
         return promise;
     }
+
+    static getPendingApplicants(ID)
+    {
+        return db.execute('Select Username from `approve` where CampaignID=? and Userstate="Pending"',[ID]);
+    }
+
+
     //calculateRating(double);
     //checkEnd();
     //excuteLaunchingStrategy();
