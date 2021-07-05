@@ -8,6 +8,7 @@ const db=mysql.createConnection({
     database:'helpmehelp',
     // password:'database',
     password:'project123',
+    namedPlaceholders:true,
 });
 
 //connect to db

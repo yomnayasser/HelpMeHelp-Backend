@@ -242,7 +242,49 @@ exports.getOrgCampaigns=function(req,res)
     .catch(err=> console.log(err));
    //res.status(200).json(id);  
 }
-
+exports.OrgSignUp=function(req,res)
+{
+    const name=req.body.name;
+    const userName=req.body.userName;
+    const password=req.body.password;
+    const country=req.body.country;
+    const Governorate=req.body.governorate;
+    const email=req.body.email;
+    const category=req.body.category;
+    const subCategory=req.body.subCategory; 
+    const organizationType=req.body.organizationType; 
+    const description=req.body.description;
+    const purpose=req.body.purpose;
+    const rating=req.body.rating;
+    const website=req.body.website;
+    const socialMedia=req.body.socialMedia; 
+    const hotline=[req.body.hotlineNumber,req.body.hotlineDesc]; 
+    const logo=req.body.logo;
+    const requestStatus="pending";
+    const location=req.body.location; 
+    const phoneNumber=req.body.phoneNumber;
+    const org=new Organization(name,userName,password,country,Governorate,email,category,subCategory,
+        organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location);
+        Organization.getOrg(userName).then(([found])=>{
+            if(found[0])
+            {
+                res.send("username already exists");
+            }
+            else
+            {
+                org.checkHotline().then(([exist])=>{
+                    if(exist[0])
+                    {
+                        res.send("hotline already exists");
+                    }
+                    else{
+                        org.register().then(res.send("user registered succesfully"));         
+                    }
+                }).catch(err=> console.log(err))
+            }
+        })
+        .catch(err=> console.log(err));
+}
 // exports.getLocation=function(req,res)
 // {
 //     const username=req.body.username;
