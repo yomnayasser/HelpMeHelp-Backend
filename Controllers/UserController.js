@@ -111,27 +111,48 @@ exports.addUserRate=function(req,res){
 
 exports.GetUser=function(req,res){
     const username=req.body.username;
-    const pass=req.body.password;
+    const password=req.body.password;
+    let role;
     User.findbyID(username)
     .then(([user])=>{
         if(!user[0])
         {
-             res.status(400).json({message:"not found" });
+             res.send({message:"NA" });
         }
         else
         {
-            bcrypt.compare(pass,user[0].password)
-            .then(doMatch =>{
-                if(doMatch)
-                {
-                    //const loggedInUser=new User(user.name,user.username,user.password,user.country,user.Governorate,user.email,user.age,user.address,user.birthday,user.role);
-                    //maza ba3d? 
-                     res.status(200).json({ message:"you are logged in"});            
-                };
+            // bcrypt.compare(pass,user[0].password)
+            // .then(doMatch =>{
+            //     if(doMatch)
+            //     {
+            //         //const loggedInUser=new User(user.name,user.username,user.password,user.country,user.Governorate,user.email,user.age,user.address,user.birthday,user.role);
+            //         //maza ba3d? 
+            //          res.send(true)           
+            //     }
+            //     else
+            //     {
+            //         res.send(false)
+            //     }
             
-                res.status(400).json({message:"wrong password"});
-            })
-            .catch(err=> console.log(err));
+            // })
+            // .catch(err=> console.log(err));
+
+            if(password==user[0].password)
+            {
+                
+                User.getUserRole(username)
+                .then(([role])=>{
+                    role=role[0].role
+                    res.send({role})
+                })
+                .catch(err=> console.log(err));
+                 
+            }
+            else
+            {
+                role="false"
+                res.send({role})
+            }
         }      
     })
     .catch(err=> console.log(err));
@@ -190,11 +211,187 @@ exports.getGovFromID= function (req,res)
 exports.getUserCampaginContributions= function (req,res)
 {
     const username=req.params.id;
-    let ids;
-    campaign.getUserCampaigns(username)
+    var ids= new Array();
+    campaign.getUserCampaignsIDS(username)
     .then(([IDS])=>{
-        ids=IDS[0].Campaign_ID;
-        res.send({ids})    
+        for(let i=0;i<IDS.length;i++)
+        {
+            ids.push(IDS[i].Campaign_ID)
+            if(i==IDS.length-1)
+            {
+                res.send({ids})  
+            }
+           
+        }
+         
+    })
+    .catch(err=> console.log(err));
+}
+
+exports.getAllCampagins= function (req,res)
+{
+    let ID; let name; let status; let orgUsername; let U_username;
+    let address; let description; let startDate; let endDate;
+    let progress; let target; let rating; let image; let dontationTypeID; 
+    var allCampaigns= new Array();
+    campaign.getAllCampaigns()
+    .then(([campaigns])=>{
+        for(let i=0;i<campaigns.length;i++)
+        {
+            var camp = new campaign();
+            name=campaigns[i].Name;
+            status=campaigns[i].Status;
+            ID=campaigns[i].Campaign_ID;
+            address=campaigns[i].Address;
+            image=campaigns[i].Image;
+            description=campaigns[i].Description;
+            startDate=campaigns[i].StartDate;
+            endDate=campaigns[i].EndDate;
+            progress=campaigns[i].Progress;
+            target=campaigns[i].Target;
+            orgUsername=campaigns[i].Org_username;
+            U_username=campaigns[i].U_username;
+            dontationTypeID=campaigns[i].DonationType;
+
+            camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
+            camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
+            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID;
+            allCampaigns.push(camp);
+
+            if(i==campaigns.length-1)
+            {
+               console.log(allCampaigns)
+                res.send(allCampaigns);
+            }
+
+        }
+    })
+    .catch(err=> console.log(err))
+}
+
+exports.UserProfile=async function(req,res)
+{
+    const username=req.params.id;
+    const user = new User();
+    let name;let userName; let password; let image;
+    let country; let Governorate; let email; let age;
+    let address; let birthday; let role; let countryID; let GovernorateID;
+    await User.findbyID(username)
+    .then(([user])=>{
+        name=user[0].Name; password=user[0].password; age=user[0].Age; birthday=user[0].birthdate;
+        email=user[0].email; userName=user[0].Username; address=user[0].Address; role=user[0].role;
+        countryID=user[0].countryID;  GovernorateID=user[0].governorateID;
+    })
+    .catch(err=> console.log(err))
+
+    await User.getUserGovernorate(GovernorateID)
+        .then(([Gname])=>{
+            Governorate=Gname[0].Name;
+           
+        })
+        .catch(err=> console.log(err))
+
+    await User.getUserCountry(countryID)
+    .then(([Cname])=>{
+        country=Cname[0].Name;
+        
+    })
+    .catch(err=> console.log(err))
+
+    user.name=name; user.userName=username; user.password=password;user.country=country; user.Governorate=Governorate;
+    user.email=email; user.age=age; user.birthday=birthday; user.address=address; user.role=role;
+   console.log(user)
+   res.send(user)   
+}
+
+exports.updateUserPorfile= function(req,res)
+{
+    const username=req.params.id;
+    const name=req.body.name; let password=req.body.password; let image;
+    let country=req.body.country; let Governorate=req.body.Governorate; let email=req.body.email; let age=req.body.age;
+    let address=req.body.address; let birthday=req.body.birthday;
+
+    bcrypt.hash(password, 12)
+    .then((hashedPassword)=>{
+        const updatedUser = new User(name,username,hashedPassword,country,Governorate,email,age,address,birthday);
+        updatedUser.updateProfile(username)
+        .then(res.send(true))
+        .catch(err=> console.log(err));
+
+        console.log(updatedUser)
+
+     
+   
+    })
+    .catch(err=> console.log(err));
+   
+   
+}
+
+exports.getUserjoinedCampagin= function (req,res)
+{
+    const username=req.params.id;
+    let ID; let name; let status; let orgUsername; let U_username;
+    let address; let description; let startDate; let endDate;
+    let progress; let target; let rating; let image; let dontationTypeID; 
+    var allCampaigns= new Array();
+    campaign.getUserCampaignsIDS(username)
+    .then(([IDS])=>{
+        console.log(IDS.length)
+        for(let i=0;i<IDS.length;i++)
+        {
+            campaign.getAllUserCampaigns(IDS[i].Campaign_ID)
+            .then(([campaigns])=>{
+            var camp = new campaign();
+            name=campaigns[0].Name;
+            status=campaigns[0].Status;
+            ID=campaigns[0].Campaign_ID;
+            address=campaigns[0].Address;
+            image=campaigns[0].Image;
+            description=campaigns[0].Description;
+            startDate=campaigns[0].StartDate;
+            endDate=campaigns[0].EndDate;
+            progress=campaigns[0].Progress;
+            target=campaigns[0].Target;
+            orgUsername=campaigns[0].Org_username;
+            U_username=campaigns[0].U_username;
+            dontationTypeID=campaigns[0].DonationType;
+
+            camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
+            camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
+            camp.image=image; camp.target=target; camp.ID=IDS[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+            allCampaigns.push(camp);
+
+            if(i==IDS.length-1)
+            {
+               console.log(allCampaigns)
+                res.send(allCampaigns);
+            }
+                
+        })
+        .catch(err=> console.log(err));
+        }
+    })
+    .catch(err=> console.log(err));
+}
+
+exports.checkUserCampaginStatus= function (req,res)
+{
+    const ID=req.params.id;
+    const username=req.params.username;
+    let status;
+    User.getUserCampaginStatus(username,ID)
+    .then(([status])=>{
+        if(status[0]==null)
+        {
+            status="null"
+        }
+        else
+        {
+            status=status[0].Userstate;
+        }
+         res.send({status})
+       // console.log({status})
     })
     .catch(err=> console.log(err));
 }
