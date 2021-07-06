@@ -4,12 +4,12 @@ var arabicNameToEn = require("arabic-name-to-en")
 const smartSearch = require('smart-search')
 
 class campaign {
-    constructor(ID,name,status,ownerID,ownerType,address,description,startDate,endDate,progress,target,rating,image,LaunchingCampaignStrategy,campaignFactory){
+    constructor(ID,name,status,orgUsername,U_username,address,description,startDate,endDate,progress,target,rating,image,LaunchingCampaignStrategy,dontationTypeID,campaignFactory){
         this.ID=ID;
         this.name=name;
         this.status=status;
-        this.ownerID=ownerID;
-        this.ownerType=ownerType;
+        this.orgUsername=orgUsername;
+        this.U_username=U_username;
         this.address=address;
         this.description=description;
         this.startDate=startDate;
@@ -18,6 +18,7 @@ class campaign {
         this.target=target;
         this.rating=rating;
         this.image=image;
+        this.dontationTypeID=dontationTypeID;
         this.LaunchingCampaignStrategy=LaunchingCampaignStrategy;
         this.campaignFactory=campaignFactory;
     }
@@ -89,9 +90,19 @@ class campaign {
         return db.execute('Select Username from `approve` where CampaignID=? and Userstate="Pending"',[ID]);
     }
 
-    static getUserCampaigns(username)
+    static getUserCampaignsIDS(username)
     {
         return db.execute('Select Campaign_ID from `join` where Username=?',[username]);
+    }
+
+    static getAllCampaigns()
+    {
+        return db.execute('select * from campaign')
+    }
+    
+    static getAllUserCampaigns(ID)
+    {
+        return db.execute('Select * from campaign where Campaign_ID=?',[ID]);
     }
 
 
