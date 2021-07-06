@@ -1,4 +1,7 @@
 const bcrypt = require('bcryptjs');
+const Cryptr=require('cryptr')
+const cryptr = new Cryptr('myTotalySecretKey');
+
 const Organization=require('../Models/Organization');
 const Campaign=require('../Models/campaign');
 const User=require('../Models/User');
@@ -14,26 +17,23 @@ exports.OrgLogIn=function(req,res)
         }
         else
         {
-            // bcrypt.compare(password,Org[0].password)
-            // .then(doMatch =>{
-            //     if(doMatch)
-            //     {
-            //         res.send(true)          
-            //     }
-            //     else{
-            //         res.send(false)
-            //     }
-                
-            // })
-            // .catch(err=> console.log(err));
-            if(password==Org[0].password)
+            const decryptedPassword=cryptr.decrypt(Org[0].password);
+            if(password==decryptedPassword)
             {
-                res.send(true)  
+                res.send(true);
             }
             else
             {
-                res.send(false)
+                res.send(false);
             }
+            // if(password==Org[0].password)
+            // {
+            //     res.send(true)  
+            // }
+            // else
+            // {
+            //     res.send(false)
+            // }
         }
     })
     .catch(err=> console.log(err))
@@ -50,7 +50,7 @@ exports.OrgProfile=async function(req,res)
     let SubcategoryID; let SubcategoryName; var socailMediaLinksArray = new Array(); var locationArray = new Array();
     await Organization.getOrg(username)
     .then(([org])=>{
-         name=org[0].name; password=org[0].password;
+         name=org[0].name; password=cryptr.decrypt(org[0].password);
           description=org[0].description;  purpose=org[0].purpose;   website=org[0].website;
           rating=org[0].rating;  logo=org[0].logo;  email=org[0].email;  requestStatus=org[0].request;
           phoneNumber=org[0].phone_num;  countryID=org[0].country_id;  GovernorateID=org[0].governorate_id;
@@ -187,8 +187,7 @@ exports.UpdatePorfile=async function(req,res)
         })
         .catch(err=> console.log(err))
 
-    bcrypt.hash(new_password, 12)
-    .then((hashedPassword)=>{
+        const hashedPassword=cryptr.encrypt(new_password);
         const updatedOrg=new Organization(new_name,org_Username,hashedPassword,new_country,new_governorate,new_email,new_category,new_SubCategory,new_orgType
             ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_logo,new_requestStatus,new_phoneNumber,new_location);
          
@@ -198,10 +197,6 @@ exports.UpdatePorfile=async function(req,res)
 
         updatedOrg.updateLocations(org_Username,locationArray)
         updatedOrg.updateSocailMedia(org_Username,socailMediaLinksArray);
-   
-    })
-    .catch(err=> console.log(err));
-   
    
 }
 
@@ -277,7 +272,8 @@ exports.OrgSignUp=function(req,res)
     const requestStatus="pending";
     const location=req.body.location; 
     const phoneNumber=req.body.phoneNumber;
-    const org=new Organization(name,userName,password,country,Governorate,email,category,subCategory,
+    const encryptedPassword=cryptr.encrypt(password);
+    const org=new Organization(name,userName,encryptedPassword,country,Governorate,email,category,subCategory,
         organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location);
         Organization.getOrg(userName).then(([found])=>{
             if(found[0])
