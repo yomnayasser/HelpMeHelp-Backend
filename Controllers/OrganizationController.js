@@ -10,7 +10,7 @@ exports.OrgLogIn=function(req,res)
     .then(([Org])=>{
         if(!Org[0])
         {
-            res.status(400).json({message:"User doesn't exsists"}) 
+            res.send({message:"NA" });
         }
         else
         {
@@ -208,7 +208,7 @@ exports.UpdatePorfile=async function(req,res)
 exports.getOrgCampaigns=function(req,res)
 {
     const username=req.params.id;
-    let name; let status; let ownerID; let address;let image; let campID;
+    let name; let status; let dontationTypeID; let address;let image; let campID;
     let description; let startDate; let endDate; let progress;let target; let id;
     var campaginsDeitals = new Array();
 
@@ -226,7 +226,7 @@ exports.getOrgCampaigns=function(req,res)
                 var camp = new Campaign();
                 name=campaign[0].Name;
                 status=campaign[0].Status;
-                ownerID=campaign[0].ownerID;
+                //ownerID=campaign[0].ownerID;
                 address=campaign[0].Address;
                 image=campaign[0].Image;
                 description=campaign[0].Description;
@@ -234,10 +234,11 @@ exports.getOrgCampaigns=function(req,res)
                 endDate=campaign[0].EndDate;
                 progress=campaign[0].Progress;
                 target=campaign[0].Target;
+                dontationTypeID=campaign[0].DonationType;
 
-                camp.name=name; camp.status=status;camp.ownerID=username; camp.startDate=startDate;
+                camp.name=name; camp.status=status;camp.orgUsername=username; camp.startDate=startDate;
                 camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-                camp.image=image; camp.target=target; camp.ID=ID[i].Campaign_ID;
+                camp.image=image; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
                 campaginsDeitals.push(camp); 
                 //console.log(campaginsDeitals.length)
                 if(i==ID.length-1)

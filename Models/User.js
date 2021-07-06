@@ -14,6 +14,7 @@ class User extends account
         // this.zakatAmount=zakatAmount;
         // this.zakatProgress=zakatProgress;
         this.role=role;
+        //this.image=image;
         //this.interests=interests;
         //this.skills=skills;
        // this.donationHistory=donationHistory;
@@ -30,6 +31,14 @@ class User extends account
     static getUserGovernorate(governorateID)
     {
         return db.execute('select Name from governorate where ID= ?',[governorateID]);
+    }
+    getGovernorateID(name)
+    {
+        return db.execute('Select ID from governorate where Name=?',[name]);
+    }
+    getCountryID(name)
+    {
+        return db.execute('Select ID from country where Name=?',[name]);
     }
     static rateCampaign(org_username,rate,username)
     {
@@ -58,7 +67,17 @@ class User extends account
     }
     updateProfile(username)
     {
-        return db.execute('UPDATE user SET Name=?,Password=?,Email=?,Age=?,Address=?,BirthDate=?,countryID=?,GovernorateID=? where username=?',[this.name,this.password,this.email,this.age,this.address,this.birthday,this.country,this.Governorate,username]);
+        return db.execute('UPDATE user SET Name=?,password=?,email=?,Age=?,Address=?,birthdate=? where Username=?'
+        ,[this.name,this.password,this.email,this.age,this.address,this.birthday,username])
+        .then( this.getGovernorateID(this.Governorate)
+        .then(([id])=>{ 
+            return db.execute('UPDATE user SET governorateID=? where username=?',[id[0].ID,username]);
+        }))
+        .then( this.getCountryID(this.country)
+        .then(([id])=>{ 
+            return db.execute('UPDATE user SET countryID=? where username=?',[id[0].ID,username]);
+        }))
+        .catch(err=> console.log(err));
     }
     static donate(amount,campID,username,date)
     {
@@ -91,8 +110,8 @@ class User extends account
         campaign.add_volunteer(campaign_id);
         db.execute('INSERT INTO `join`(Campaign_ID,Username,Date_join) VALUES (?, ?, ?)',
         [campaign_id,username,date]);
-        return db.execute('Delete from approve where CampaignID=? and Username=?',
-        [campaign_id,username]);
+        // return db.execute('Delete from approve where CampaignID=? and Username=?',
+        // [campaign_id,username]);
 
     }
     static get_donation_history(username)
@@ -104,6 +123,17 @@ class User extends account
     {
 
     }
+
+    static getUserRole(username)
+    {
+        return db.execute('Select role from user where Username = ?',[username]);
+    }
+
+    static getUserCampaginStatus(username,ID)
+    {
+        return db.execute('Select Userstate from `approve` where Username = ? and CampaignID=?',[username,ID]);
+    }
+
     
     
 }
