@@ -34,6 +34,7 @@ app.get('/', (req,res) => {
 })
 
 io.on('connection', (socket) => {
+        console.log("connected")
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
         console.log(socket.id);
