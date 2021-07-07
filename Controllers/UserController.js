@@ -200,6 +200,12 @@ exports.getUserCampaginContributions= function (req,res)
     var ids= new Array();
     campaign.getUserCampaignsIDS(username)
     .then(([IDS])=>{
+        if(IDS.length==0)
+        {
+            ids.push(0)
+            res.send({ids})
+
+        }
         for(let i=0;i<IDS.length;i++)
         {
             ids.push(IDS[i].Campaign_ID)
