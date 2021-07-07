@@ -266,13 +266,13 @@ exports.UserProfile=async function(req,res)
     const username=req.params.id;
     const user = new User();
     let name; let userName; let password; let image;
-    let country; let Governorate; let email; let age;
+     let Governorate; let email; let age;
     let address; let birthday; let role; let countryID; let GovernorateID;
     await User.findbyID(username)
     .then(([user])=>{
         name=user[0].Name; password=cryptr.decrypt(user[0].password); age=user[0].Age; birthday=user[0].birthdate;
         email=user[0].email; userName=user[0].Username; address=user[0].Address; role=user[0].role; image=user[0].image;
-        countryID=user[0].countryID;  GovernorateID=user[0].governorateID;
+          GovernorateID=user[0].governorateID;
     })
     .catch(err=> console.log(err))
 
@@ -283,14 +283,14 @@ exports.UserProfile=async function(req,res)
         })
         .catch(err=> console.log(err))
 
-    await User.getUserCountry(countryID)
-    .then(([Cname])=>{
-        country=Cname[0].Name;
+    // await User.getUserCountry(countryID)
+    // .then(([Cname])=>{
+    //     country=Cname[0].Name;
         
-    })
-    .catch(err=> console.log(err))
+    // })
+    // .catch(err=> console.log(err))
 
-    user.name=name; user.userName=username; user.password=password;user.country=country; user.Governorate=Governorate;
+    user.name=name; user.userName=username; user.password=password;user.country="Egypt"; user.Governorate=Governorate;
     user.email=email; user.age=age; user.birthday=birthday; user.address=address; user.role=role; user.image=image;
    console.log(user)
    res.send(user)   
@@ -300,12 +300,12 @@ exports.updateUserPorfile= function(req,res)
 {
     const username=req.params.id;
     const name=req.body.name; let password=req.body.password; 
-    let country=req.body.country; let Governorate=req.body.Governorate; let email=req.body.email; let age=req.body.age;
+     let Governorate=req.body.Governorate; let email=req.body.email; let age=req.body.age;
     let address=req.body.address; let birthday=req.body.birthday; let image=req.body.image;
 
     const hashedPassword=cryptr.encrypt(password);
     User.getUserRole(username).then(([role])=>{
-        const updatedUser = new User(name,username,hashedPassword,country,Governorate,email,age,address,birthday,role[0],image);
+        const updatedUser = new User(name,username,hashedPassword,"Egypt",Governorate,email,age,address,birthday,role[0],image);
         updatedUser.updateProfile(username)
         .then(res.send(true))
         .catch(err=> console.log(err));
