@@ -69,17 +69,26 @@ class campaign {
         let promise= db.execute('select * from campaign limit ?,?',
         [startRow,rowCount]);
         promise.then((rows)=>{
-            const campaigns=rows[0];
+            let campaigns=rows[0];
+            let all_eng_campaigns=rows[0];
+            //console.log(campaigns);
+            //console.log(rows[0]);
+            //console.log(campaigns[2].Name);
+            //console.log(rows[0][2].Name);
             for(let i=0;i<campaigns.length;i++)
             {
-                campaigns[i].Name=arabicNameToEn(campaigns[i].Name);
+                all_eng_campaigns[i].Name=arabicNameToEn(all_eng_campaigns[i].Name);
+                all_eng_campaigns[i].Description=arabicNameToEn(all_eng_campaigns[i].Description);
             } 
-            //console.log(campaigns);
-            const entries = campaigns;
+            //console.log(campaigns[2].Name);
+            //console.log(rows[0][2].Name);
+            //console.log(all_eng_campaigns[2].Name);
+            const entries = all_eng_campaigns;
             var patterns = [text];
             var fields = { Name: true, Description: true };
             var results = smartSearch(entries, patterns, fields);
             console.log(results);
+
         })
         .catch(err=> console.log(err));
         return promise;
