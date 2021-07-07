@@ -4,11 +4,11 @@ const db=mysql.createConnection({
     host:'localhost',
     user:'root',
 
-    // password:'sarafares1999',
-    database:'helpmehelp',
-   //database:'helpmehelpdb',
+     password:'sarafares1999',
+    //database:'helpmehelp',
+   database:'helpmehelp',
      //password:'database',
-    password:'project123',
+    //password:'project123',
     namedPlaceholders:true,
 });
 
