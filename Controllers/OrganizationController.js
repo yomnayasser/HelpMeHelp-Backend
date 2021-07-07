@@ -50,10 +50,20 @@ exports.OrgProfile=async function(req,res)
     let SubcategoryID; let SubcategoryName; var socailMediaLinksArray = new Array(); var locationArray = new Array();
     await Organization.getOrg(username)
     .then(([org])=>{
-         name=org[0].name; password=cryptr.decrypt(org[0].password);
-          description=org[0].description;  purpose=org[0].purpose;   website=org[0].website;
+       // console.log(org[0])
+         name=org[0].name; password=org[0].password
+          description=org[0].description;  purpose=org[0].purpose;  
           rating=org[0].rating;  logo=org[0].logo;  email=org[0].email;  requestStatus=org[0].request;
           phoneNumber=org[0].phone_num;  countryID=org[0].country_id;  GovernorateID=org[0].governorate_id;
+          if(org[0].website==null)
+          {
+            website="No website availble"
+          }
+          else
+          {
+            website=org[0].website;
+          }
+        //   password=cryptr.decrypt(org[0].password);
     })
     .catch(err=> console.log(err))
 
@@ -121,22 +131,33 @@ exports.OrgProfile=async function(req,res)
         .catch(err=> console.log(err))
    await Organization.getHotline(username)
         .then(([hotline])=>{
+            if(hotline[0]==null)
+            {
+                hotlineTemp="No hotline number"
+            }
+            else{
             hotlineTemp=hotline[0].Number;
+            }
         })
         .catch(err=> console.log(err))
 
     await  Organization.getSocailMedia(username)
         .then(([links])=>{
-            
+            if(links.length==0)
+            {
+                Org.socialMedia="No social media links"
+            }
+            else{
             for(let i=0;i<links.length;i++)
             {
                 socailMediaLinksArray.push(links[i].socialmediaLink);
             }
+        }
 
         })
         .catch(err=> console.log(err))
     Org.name=name; Org.userName=username; Org.password=password;Org.country=countryName; Org.Governorate=GovernorateName;
-    Org.Subcategory=SubcategoryName; Org.category=categoryName; Org.email=email;
+    Org.subCategory=SubcategoryName; Org.category=categoryName; Org.email=email;
    Org.organizationType=organizationTypeName; Org.description=description; Org.purpose=purpose; Org.rating=rating;
    Org.website=website; Org.logo=logo; Org.requestStatus=requestStatus; Org.phoneNumber=phoneNumber; Org.location=locationArray;
    Org.hotline=hotlineTemp; Org.socialMedia=socailMediaLinksArray;
