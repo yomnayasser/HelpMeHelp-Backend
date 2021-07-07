@@ -5,8 +5,8 @@ const db=mysql.createConnection({
     user:'root',
 
     // password:'sarafares1999',
-    //database:'helpmehelp',
-   database:'helpmehelpdb',
+    database:'helpmehelp',
+  // database:'helpmehelpdb',
      password:'database',
     //password:'project123',
     namedPlaceholders:true,
