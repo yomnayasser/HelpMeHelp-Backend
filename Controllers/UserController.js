@@ -386,7 +386,7 @@ exports.UserSignUp=function(req,res)
     const name=req.body.name;
     const userName=req.body.userName;
     const password=req.body.password;
-    const country=req.body.country;
+    const country="Egypt";
     const Governorate=req.body.Governorate;
     const email=req.body.email;
     const age=req.body.age;
@@ -400,11 +400,11 @@ exports.UserSignUp=function(req,res)
         User.findbyID(userName).then(([found])=>{
             if(found[0])
             {
-                res.send("username already exists");
+                res.send(false);
             }
             else
             {
-                u.register().then(res.send("user registered succesfully"));
+                u.register().then(res.send(true));
             }
         })
         .catch(err=> console.log(err));
