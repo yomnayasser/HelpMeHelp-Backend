@@ -5,20 +5,14 @@ const campaign=require("./campaign");
 
 class User extends account
 {
-    constructor(name,userName,password,country,Governorate,email,age,address,birthday,role)
+    constructor(name,userName,password,country,Governorate,email,age,address,birthday,role,image)
     {
         super(name,userName,password,country,Governorate,email);
         this.age=age;
         this.address=address;
         this.birthday=birthday;
-        // this.zakatAmount=zakatAmount;
-        // this.zakatProgress=zakatProgress;
         this.role=role;
-        //this.image=image;
-        //this.interests=interests;
-        //this.skills=skills;
-       // this.donationHistory=donationHistory;
-        //this.joinedCampaigns=joinedCampaigns;
+        this.image=image;
     }
     static findbyID(username)
     {
@@ -67,8 +61,8 @@ class User extends account
     }
     updateProfile(username)
     {
-        return db.execute('UPDATE user SET Name=?,password=?,email=?,Age=?,Address=?,birthdate=? where Username=?'
-        ,[this.name,this.password,this.email,this.age,this.address,this.birthday,username])
+        return db.execute('UPDATE user SET Name=?,password=?,email=?,Age=?,Address=?,birthdate=?,image=? where Username=?'
+        ,[this.name,this.password,this.email,this.age,this.address,this.birthday,this.image,username])
         .then( this.getGovernorateID(this.Governorate)
         .then(([id])=>{ 
             return db.execute('UPDATE user SET governorateID=? where username=?',[id[0].ID,username]);
@@ -133,7 +127,20 @@ class User extends account
     {
         return db.execute('Select Userstate from `approve` where Username = ? and CampaignID=?',[username,ID]);
     }
-
+    register()
+    {
+        try{
+            return this.getCountryID(this.country).then(([countryID])=>{
+                this.getGovernorateID(this.Governorate).then(([governorateID])=>{
+                    db.execute('insert into user values(?,?,?,?,?,?,?,?,?,?,?)'
+                    ,[this.userName,this.name,this.age,this.address,this.email,this.image,this.password,this.role,this.birthday,countryID[0].ID,governorateID[0].ID]);
+                }).catch(err=> console.log(err));
+            })
+        }
+        catch(err){
+            err=> console.log(err);
+        }
+    }
     
     
 }
