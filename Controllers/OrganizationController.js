@@ -63,6 +63,10 @@ exports.OrgProfile=async function(req,res)
           {
             website=org[0].website;
           }
+          if(org[0].logo==null)
+          {
+            logo="No Image"
+          }
         //   password=cryptr.decrypt(org[0].password);
     })
     .catch(err=> console.log(err))
@@ -277,7 +281,7 @@ exports.OrgSignUp=function(req,res)
     const name=req.body.name;
     const userName=req.body.userName;
     const password=req.body.password;
-    const country=req.body.country;
+    const country="Egypt";
     const Governorate=req.body.governorate;
     const email=req.body.email;
     const category=req.body.category;
@@ -285,7 +289,7 @@ exports.OrgSignUp=function(req,res)
     const organizationType=req.body.organizationType; 
     const description=req.body.description;
     const purpose=req.body.purpose;
-    const rating=req.body.rating;
+    const rating=0;
     const website=req.body.website;
     const socialMedia=req.body.socialMedia; 
     const hotline=[req.body.hotlineNumber,req.body.hotlineDesc]; 
@@ -299,17 +303,25 @@ exports.OrgSignUp=function(req,res)
         Organization.getOrg(userName).then(([found])=>{
             if(found[0])
             {
-                res.send("username already exists");
+                res.send(false);
             }
             else
             {
                 org.checkHotline().then(([exist])=>{
                     if(exist[0])
                     {
-                        res.send("hotline already exists");
+                        if(exist[0].Number==0)
+                        {
+                            org.register().then(res.send(true)); 
+                        }
+                        else
+                        {
+                            res.send("hotline already exists");
+                        }
+                        
                     }
                     else{
-                        org.register().then(res.send("user registered succesfully"));         
+                        org.register().then(res.send(true));         
                     }
                 }).catch(err=> console.log(err))
             }

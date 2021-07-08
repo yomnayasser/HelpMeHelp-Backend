@@ -16,11 +16,16 @@ class admin
             }
         })
     }
+    static getAllUsers()
+    {
+        return db.execute('select * from user where role="user" ')
+    }
     static addAdmin(username)
     {
+       
         return db.execute('select username from user where username= ? ',[username])
-        .then(([username])=>{
-            if(!username[0])
+        .then(([Username])=>{
+            if(!Username[0])
             {
                 return null;
             }
@@ -33,6 +38,10 @@ class admin
     static viewAllPendingOrganizations()
     {
         return db.execute('select username from organization where request="pending"');
+    }
+    static viewAllAcceptedOrganizations()
+    {
+        return db.execute('select username from organization where request="accepted"');
     }
     static GetOrganizations()
     {
@@ -171,16 +180,87 @@ class admin
     {
         return db.execute('UPDATE organization SET request="accepted" where username= ?',[Organization_userName]);
     }
-    static removeOrganization(Organization_userName)
+    static async removeOrganizationExtraDetails(Organization_userName)
     {
         return db.execute("Delete from has_category where org_username=?",[Organization_userName])
         .then(db.execute("Delete from has_subcategory where org_username=?",[Organization_userName]))
         .then(db.execute("Delete from has_organization_type where org_username=?",[Organization_userName]))
-        .then(db.execute("Delete from hotline where org_username=?",[Organization_userName]))
+        .then( db.execute("Select Number from hotline where org_username=?",[Organization_userName])
+        .then(([number])=>{ 
+            if(number[0]!=null)
+            {
+                console.log("hereeeeee")
+            return db.execute("Delete from hotline where org_username=?",[Organization_userName])
+            }
+        }))
+        // .then(db.execute("Delete from hotline where org_username=?",[Organization_userName]))
         .then(db.execute("Delete from locations where org_username=?",[Organization_userName]))
-        .then(db.execute("Delete from socialmedia where org_username=?",[Organization_userName]))
-        .then(db.execute("DELETE FROM organization WHERE username=?",[Organization_userName]))
+        .then( db.execute("Select socialmediaLink from socialmedia where Org_username=?",[Organization_userName])
+        .then(([links])=>{ 
+            if(links[0]!=null)
+            {
+            return db.execute("Delete from socialmedia where org_username=?",[Organization_userName])
+            }
+        }))
+        //.then(db.execute("Delete from socialmedia where org_username=?",[Organization_userName]))
         .catch(err=> console.log(err));
+    }
+    static RemoveMainOrganization(Organization_userName)
+    {
+        db.execute("DELETE FROM organization WHERE username=?",[Organization_userName]);
+    }
+    static async RemoveOrganizationCampaignsDetails(Organization_userName)
+    {
+        return db.execute('select campaign_id from campaign where org_username=? ',[Organization_userName]).then(([id])=>{
+            if(id[0]!=null)
+            {
+                for(let i=0;i<id.length;i++)
+                {
+                    db.execute('select * from Approve where CampaignID=?',[id[i].campaign_id]).then(([result])=>{
+                        if(result[0]!=null)
+                        {
+                            db.execute('delete from Approve where CampaignID=?',[id[i].campaign_id]);
+                        }
+                    })
+                    db.execute('select * from `join` where Campaign_ID=?',[id[i].campaign_id]).then(([result])=>{
+                        if(result[0]!=null)
+                        {
+                            db.execute('delete from `join` where Campaign_ID=?',[id[i].campaign_id]);
+                        }
+                    })
+                    db.execute('select * from request_Donation where Campaign_ID=?',[id[i].campaign_id]).then(([result])=>{
+                        if(result[0]!=null)
+                        {
+                            db.execute('delete from request_Donation where Campaign_ID=?',[id[i].campaign_id]);
+                        }
+                    })
+                    db.execute('select campaign_embed from campaign_embed where Campaign_ID=?',[id[i].campaign_id]).then(([camp_id])=>{
+                        if(camp_id[0]!=null)
+                        {
+                            db.execute('select * from interactions where CampEmbed=?',[camp_id[0].campaign_embed]).then(([result])=>{
+                                if(result[0]!=null)
+                                {
+                                    db.execute('delete from interactions where CampEmbed=?',[camp_id[0].campaign_embed]).then(()=>{
+                                        db.execute('delete from campaign_embed where campaign_ID=?',[id[i].campaign_id]);
+                                    }) 
+                                }
+                            })  
+                        }
+                    })
+                }
+            }
+        }).catch(err=> console.log(err));
+    }
+    static RemoveOrganizationCampaigns(Organization_userName)
+    {
+        return db.execute('select campaign_id from campaign where org_username=? ',[Organization_userName]).then(([id])=>{
+            if (id[0] != null) {
+              for (let i = 0; i < id.length; i++) 
+              {
+                db.execute("delete from campaign where campaign_ID=?", [id[i].campaign_id,]);
+              }
+            }
+        }).catch(err=> console.log(err));
     }
 }
 module.exports=admin;
