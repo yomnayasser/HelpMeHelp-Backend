@@ -10,7 +10,11 @@ router.post('/join',userCotnroller.join);
 //router.get('/history',userCotnroller.history);
 router.get('/search',userCotnroller.search);
 router.post('/userSignUp',userCotnroller.UserSignUp);
-//router.post('/chat',userCotnroller.getOldMessages);
+/////////chat///////////
+router.get('/oldChat/:chatID/:chatType',userCotnroller.getOldMessages);
+router.get('/getChatID/:sender/:reciever/:chatType',userCotnroller.getChatID);
+
+
 
 router.get('/userCountry/:id',userCotnroller.getCountryFromID);
 router.get('/userGov/:id',userCotnroller.getGovFromID);

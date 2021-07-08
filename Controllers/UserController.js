@@ -8,16 +8,28 @@ const hotline=require("../Models/hotline");
 const chat=require("../Models/chat");
 var arabicNameToEn = require("arabic-name-to-en")
 
-/*exports.getOldMessages=function(req,res){
-    const chatID=req.body.chatID;
-    const chatType=req.body.chatType;
+exports.getOldMessages=function(req,res){
+    const chatID=req.params.chatID;
+    const chatType=req.params.chatType;
     chat.get_old_messages(chatType,chatID)
     .then(([messages])=>{
-        res.status(200).json({message:'message returned'});
-        console.log(messages[0].Text);
+        console.log(messages);
+        res.send(messages);
     })
     .catch(err=>console.log(err));
-}*/
+}
+
+exports.getChatID=function(req,res){
+    const sender=req.params.sender;
+    const reciever=req.params.reciever;
+    const chatType=req.params.chatType;
+    chat.get_id(sender,reciever,chatType)
+    .then(([Chat_ID])=>{
+        //console.log(Chat_ID[0].Chat_ID);
+        res.send(Chat_ID[0].Chat_ID);
+    })
+    .catch(err=>console.log(err));
+}
 /*exports.saveMessage=function(req,res){
     const message=req.body.message;
     const sender=req.body.sender;
@@ -31,7 +43,7 @@ var arabicNameToEn = require("arabic-name-to-en")
     })
     .catch(err=>console.log(err));
 }*/
-/*exports.chat=function(req,res){
+/*exports.chat=function(req,res){`
     const sender=req.body.sender;
     const reciever=req.body.reciever;
     const chatType=req.body.chatType;
