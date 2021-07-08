@@ -63,6 +63,10 @@ exports.OrgProfile=async function(req,res)
           {
             website=org[0].website;
           }
+          if(org[0].logo==null)
+          {
+            logo="No Image"
+          }
         //   password=cryptr.decrypt(org[0].password);
     })
     .catch(err=> console.log(err))

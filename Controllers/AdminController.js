@@ -63,7 +63,27 @@ exports.ViewAllPendings=function(req,res){
         for(let i=0;i<allOrg.length;i++)
         {
             Admin.getOrganizationInfo(allOrg[i].username).then((Org)=>{
-                allOrgArr.push(Org);
+                if(allOrg[i].username)
+                {
+                    if(Org.hotline==null)
+                    {
+                        Org.hotline="No Hotline"
+                    }
+                    if(Org.website==null)
+                    {
+                        Org.website="No Website"
+                    }
+                    if(Org.socialMedia.length==0)
+                    {
+                        
+                        Org.socialMedia="No Socail Media"
+                    }
+                    if(Org.logo==null)
+                    {
+                        Org.hotline="No Image"
+                    }
+                    allOrgArr.push(Org);
+                }
                 if(i==allOrg.length-1)
                 {
                     res.json(allOrgArr);
@@ -76,18 +96,13 @@ exports.ViewAllPendings=function(req,res){
 }
 exports.ApproveOrganization=function(req,res){
     const org_username=req.body.username;
-    Admin.acceptOrganization(org_username).then(
-        res.status(200).json({
-            message:"organization accepted"
-        }))
+    console.log(org_username)
+    Admin.acceptOrganization(org_username).then(res.send(true))
     .catch(err=> console.log(err));
 }
 exports.RemoveOrganization=function(req,res){
     const org_username=req.body.username;
     Admin.removeOrganization(org_username)
-    .then(
-        res.status(200).json({
-            message:"organization deleted"
-        }))
+    .then(res.send(true))
     .catch(err=> console.log(err));
 }
