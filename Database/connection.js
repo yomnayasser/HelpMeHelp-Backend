@@ -17,9 +17,9 @@ const db=mysql.createConnection({
      //password:'database',
     //database:'helpmehelp',
   // database:'helpmehelpdb',
-     password:'database',
+    // password:'database',
 
-    //password:'project123',
+    password:'project123',
     namedPlaceholders:true,
 });
 

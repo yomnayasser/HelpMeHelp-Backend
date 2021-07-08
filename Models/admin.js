@@ -186,7 +186,7 @@ class admin
         .then(db.execute("Delete from has_organization_type where org_username=?",[Organization_userName]))
         .then( db.execute("Select Number from hotline where org_username=?",[Organization_userName])
         .then(([number])=>{ 
-            if(number[0].Number!=null)
+            if(number[0]!=null)
             {
                 console.log("hereeeeee")
             return db.execute("Delete from hotline where org_username=?",[Organization_userName])
@@ -196,9 +196,9 @@ class admin
         .then(db.execute("Delete from locations where org_username=?",[Organization_userName]))
         .then( db.execute("Select socialmediaLink from socialmedia where Org_username=?",[Organization_userName])
         .then(([links])=>{ 
-            if(links[0].socialmediaLink!=null)
+            if(links[0]!=null)
             {
-            return db.execute("Delete from hotline where org_username=?",[Organization_userName])
+            return db.execute("Delete from socialmedia where org_username=?",[Organization_userName])
             }
         }))
         //.then(db.execute("Delete from socialmedia where org_username=?",[Organization_userName]))

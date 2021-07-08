@@ -129,7 +129,7 @@ exports.ViewAllAccepted=function(req,res){
                     }
                     if(Org.logo==null)
                     {
-                        Org.hotline="No Image"
+                        Org.logo="No Image"
                     }
                     allOrgArr.push(Org);
                 }
@@ -154,32 +154,31 @@ exports.ViewAllUsers=async function(req,res){
         for(let i=0;i<users.length;i++)
         {
             const user = new User();
-           await  User.findbyID(users[i].Username)
+            User.findbyID(users[i].Username)
             .then(([user])=>{
                 name=user[0].Name;  age=user[0].Age; birthday=user[0].birthdate;
                 email=user[0].email; userName=user[0].Username; address=user[0].Address; role=user[0].role; image=user[0].image;
                   GovernorateID=user[0].governorateID;
-            })
-            .catch(err=> console.log(err))
-        
-             await User.getUserGovernorate(GovernorateID)
+            }).then(()=>{
+                User.getUserGovernorate(GovernorateID)
                 .then(([Gname])=>{
                     Governorate=Gname[0].Name;
-                   
+
+                    user.name=name; user.userName=username; user.password=password;user.country="Egypt"; user.Governorate=Governorate;
+                    user.email=email; user.age=age; user.birthday=birthday; user.address=address; user.role=role; user.image=image;
+                   //console.log(user)
+                   allUserArr.push(user)
+                   if(i==users.length-1)
+                    {
+                        console.log(allUserArr)
+                        res.json(allUserArr);
+                        return allUserArr;
+                       
+                    }
                 })
                 .catch(err=> console.log(err))
-        
-            user.name=name; user.userName=username; user.password=password;user.country="Egypt"; user.Governorate=Governorate;
-            user.email=email; user.age=age; user.birthday=birthday; user.address=address; user.role=role; user.image=image;
-           //console.log(user)
-           allUserArr.push(user)
-           if(i==users.length-1)
-            {
-                console.log(allUserArr)
-                res.json(allUserArr);
-                return allUserArr;
-               
-            }
+            })
+
         }
 
     })
