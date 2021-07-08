@@ -92,11 +92,25 @@ exports.ApproveOrganization=function(req,res){
     Admin.acceptOrganization(org_username).then(res.send(true))
     .catch(err=> console.log(err));
 }
-exports.RemoveOrganization=async function(req,res){
-    const org_username=req.params.username;
+exports.RejectOrganization=async function(req,res){
+    const org_username=req.body.username;
     await Admin.removeOrganizationExtraDetails(org_username)
     .then(()=>{
         Admin.RemoveMainOrganization(org_username);
+    })
+    .then(res.send(true))
+    .catch(err=> console.log(err));
+}
+exports.RemoveOrganization=async function(req,res){
+    const org_username=req.params.username;
+    await Admin.RemoveOrganizationCampaignsDetails(org_username)
+    .then(async function(){
+        await Admin.RemoveOrganizationCampaigns(org_username);
+    }).then(async function(){
+        await Admin.removeOrganizationExtraDetails(org_username)
+        .then(()=>{
+            Admin.RemoveMainOrganization(org_username);
+        })
     })
     .then(res.send(true))
     .catch(err=> console.log(err));
