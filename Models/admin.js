@@ -16,6 +16,10 @@ class admin
             }
         })
     }
+    static getAllUsers()
+    {
+        return db.execute('select * from user where role="user" ')
+    }
     static addAdmin(username)
     {
         return db.execute('select username from user where username= ? ',[username])
@@ -33,6 +37,10 @@ class admin
     static viewAllPendingOrganizations()
     {
         return db.execute('select username from organization where request="pending"');
+    }
+    static viewAllAcceptedOrganizations()
+    {
+        return db.execute('select username from organization where request="accepted"');
     }
     static GetOrganizations()
     {
