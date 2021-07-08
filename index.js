@@ -8,12 +8,7 @@ var OrgLoginRouter = require('./Routes/OrganizationRouter')
 const app=express();
 
 
-app.use(bodyParser.urlencoded({extended:false}));
-app.use(express.json());
 
-app.use(LoginRouter);
-app.use(AdminRouter);
-app.use(OrgLoginRouter);
 //connect to server
 /*app.listen('8080',function(){
     console.log('server started');
@@ -27,14 +22,16 @@ const io = new Server(server);
 const path = require('path');
 const { Socket } = require('dgram');
 
-app.use(express.static(path.join(__dirname + '/public')))
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(express.json());
 
-app.get('/', (req,res) => {
-    res.sendFile(path.join(__dirname+'/chatUI.html'));
-})
+app.use(LoginRouter);
+app.use(AdminRouter);
+app.use(OrgLoginRouter);
+
 
 io.on('connection', (socket) => {
-        console.log("connected")
+        console.log("connected lololo");
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
         console.log(socket.id);
