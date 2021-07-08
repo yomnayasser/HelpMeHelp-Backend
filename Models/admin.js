@@ -22,9 +22,10 @@ class admin
     }
     static addAdmin(username)
     {
+       
         return db.execute('select username from user where username= ? ',[username])
-        .then(([username])=>{
-            if(!username[0])
+        .then(([Username])=>{
+            if(!Username[0])
             {
                 return null;
             }
@@ -179,7 +180,7 @@ class admin
     {
         return db.execute('UPDATE organization SET request="accepted" where username= ?',[Organization_userName]);
     }
-    static removeOrganization(Organization_userName)
+   static removeOrganizationExtraDetails(Organization_userName)
     {
         return db.execute("Delete from has_category where org_username=?",[Organization_userName])
         .then(db.execute("Delete from has_subcategory where org_username=?",[Organization_userName]))
@@ -202,8 +203,11 @@ class admin
             }
         }))
         //.then(db.execute("Delete from socialmedia where org_username=?",[Organization_userName]))
-        .then(db.execute("DELETE FROM organization WHERE username=?",[Organization_userName]))
         .catch(err=> console.log(err));
+    }
+    static RemoveMainOrganization(Organization_userName)
+    {
+       return db.execute("DELETE FROM organization WHERE username=?",[Organization_userName]);
     }
 }
 module.exports=admin;

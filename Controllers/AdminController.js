@@ -8,15 +8,11 @@ exports.PostAddHotline= function(req,res){
     .then((result)=>{
         if(!result)
         {
-            res.status(404).json({
-                message:"hotline already exists"
-            })
+            res.send(false)
         }
         else
         {
-            res.status(200).json({
-                message:"Hotline added"
-            })
+           res.send(true)
         }
     })
     .catch(err=> console.log(err));
@@ -27,15 +23,11 @@ exports.PostAddAdmin=function(req,res){
     .then((result)=>{
         if(!result)
         {
-            res.status(404).json({
-                message:"user not found"
-            })
+           res.send(false)
         }
         else
         {
-            res.status(200).json({
-                message:"Admin added"
-            })
+           res.send(true)
         }
     })
     .catch(err=> console.log(err));
@@ -100,9 +92,12 @@ exports.ApproveOrganization=function(req,res){
     Admin.acceptOrganization(org_username).then(res.send(true))
     .catch(err=> console.log(err));
 }
-exports.RemoveOrganization=function(req,res){
-    const org_username=req.body.username;
-    Admin.removeOrganization(org_username)
+exports.RemoveOrganization=async function(req,res){
+    const org_username=req.params.username;
+    await Admin.removeOrganizationExtraDetails(org_username)
+    .then(()=>{
+        Admin.RemoveMainOrganization(org_username);
+    })
     .then(res.send(true))
     .catch(err=> console.log(err));
 }
@@ -148,36 +143,30 @@ exports.ViewAllUsers=async function(req,res){
     let name; let userName; let password; let image;
      let Governorate; let email; let age; let username;
     let address; let birthday; let role; let countryID; let GovernorateID;
-    var allUserArr=[];
+    var allUserArr= new Array();
       Admin.getAllUsers()
     .then(([users])=>{
         for(let i=0;i<users.length;i++)
         {
-            const user = new User();
-            User.findbyID(users[i].Username)
+            console.log(users)
+             User.findbyID(users[i].Username)
             .then(([user])=>{
-                name=user[0].Name;  age=user[0].Age; birthday=user[0].birthdate;
+               
+                name=user[0].Name;  age=user[0].Age; birthday=user[0].birthdate; password=user[0].password
                 email=user[0].email; userName=user[0].Username; address=user[0].Address; role=user[0].role; image=user[0].image;
-                  GovernorateID=user[0].governorateID;
-            }).then(()=>{
-                User.getUserGovernorate(GovernorateID)
-                .then(([Gname])=>{
-                    Governorate=Gname[0].Name;
-
-                    user.name=name; user.userName=username; user.password=password;user.country="Egypt"; user.Governorate=Governorate;
-                    user.email=email; user.age=age; user.birthday=birthday; user.address=address; user.role=role; user.image=image;
-                   //console.log(user)
-                   allUserArr.push(user)
+                Governorate=user[0].governorateID;
+                const userData = new User();
+                userData.name=name; userData.userName=userName; userData.password=password;userData.country="Egypt"; userData.Governorate=Governorate;
+                userData.email=email; userData.age=age; userData.birthday=birthday; userData.address=address; userData.role=role; userData.image=image;
+                allUserArr.push(userData)
                    if(i==users.length-1)
                     {
-                        console.log(allUserArr)
-                        res.json(allUserArr);
-                        return allUserArr;
+                         console.log(allUserArr)
+                        res.send(allUserArr)
                        
                     }
-                })
-                .catch(err=> console.log(err))
             })
+            .catch(err=> console.log(err))
 
         }
 

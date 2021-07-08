@@ -8,5 +8,5 @@ router.get('/admin/AllUsers',adminCotnroller.ViewAllUsers);
 router.get('/admin/AllPendingOrganizations',adminCotnroller.ViewAllPendings);
 router.get('/admin/AllAcceptedOrganizations',adminCotnroller.ViewAllAccepted);
 router.post('/admin/handleRequest',adminCotnroller.ApproveOrganization);
-router.delete('/admin/removeOrganization',adminCotnroller.RemoveOrganization);
+router.delete('/admin/removeOrganization/:username',adminCotnroller.RemoveOrganization);
 module.exports=router;
