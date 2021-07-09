@@ -238,15 +238,11 @@ class Organization extends account
     {
         return db.execute('UPDATE `approve` SET Userstate="Rejected" where CampaignID=? and Username=?',[ID,username]);
     }
-
-    calculateRating()
+    static getStatus(username)
     {
-
+        return db.execute('Select request from organization where Username=?',[username]);
     }
-    excuteRegisterStrategy()
-    {
-
-    }
+   
 }
 
 module.exports=Organization;

@@ -11,10 +11,12 @@ var arabicNameToEn = require("arabic-name-to-en")
 exports.getOldMessages=function(req,res){
     const chatID=req.params.chatID;
     const chatType=req.params.chatType;
+    console.log(chatID)
+    console.log(chatType)
     chat.get_old_messages(chatType,chatID)
     .then(([messages])=>{
         console.log(messages);
-        res.send(messages);
+        res.json(messages);
     })
     .catch(err=>console.log(err));
 }
@@ -27,6 +29,7 @@ exports.getChatID=function(req,res){
     .then(([Chat_ID])=>{
         //console.log(Chat_ID[0].Chat_ID);
         res.send(Chat_ID[0]);
+
     })
     .catch(err=>console.log(err));
 }
