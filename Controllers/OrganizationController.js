@@ -5,7 +5,6 @@ const cryptr = new Cryptr('myTotalySecretKey');
 const Organization=require('../Models/Organization');
 const Campaign=require('../Models/campaign');
 const User=require('../Models/User');
-const campaign = require('../Models/campaign');
 exports.OrgLogIn=function(req,res)
 {
     const username=req.body.username;
@@ -242,6 +241,7 @@ exports.getOrgCampaigns=function(req,res)
     const username=req.params.id;
     let name; let status; let dontationTypeID; let address;let image; let campID;
     let description; let startDate; let endDate; let progress;let target; let id;
+    let process;
     var campaginsDeitals = new Array();
 
      
@@ -266,11 +266,12 @@ exports.getOrgCampaigns=function(req,res)
                 endDate=campaign[0].EndDate;
                 progress=campaign[0].Progress;
                 target=campaign[0].Target;
+                process=campaign[0].process;
                 dontationTypeID=campaign[0].DonationType;
 
                 camp.name=name; camp.status=status;camp.orgUsername=username; camp.startDate=startDate;
                 camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-                camp.image=image; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+                camp.image=image;camp.process=process; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
                 campaginsDeitals.push(camp); 
                 //console.log(campaginsDeitals.length)
                 if(i==ID.length-1)
