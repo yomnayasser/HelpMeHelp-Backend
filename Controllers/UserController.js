@@ -317,7 +317,8 @@ exports.getAllCampagins= function (req,res)
 {
     let ID; let name; let status; let orgUsername; let U_username;
     let address; let description; let startDate; let endDate;
-    let progress; let target; let rating; let image; let dontationTypeID; 
+    let progress; let target; let rating; let image; let dontationTypeID;
+    let process; 
     var allCampaigns= new Array();
     campaign.getAllCampaigns()
     .then(([campaigns])=>{
@@ -336,11 +337,12 @@ exports.getAllCampagins= function (req,res)
             target=campaigns[i].Target;
             orgUsername=campaigns[i].Org_username;
             U_username=campaigns[i].U_username;
+            process=campaigns[i].process;
             dontationTypeID=campaigns[i].DonationType;
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID;
+            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID; camp.process=process;
             allCampaigns.push(camp);
 
             if(i==campaigns.length-1)
@@ -412,6 +414,7 @@ exports.getUserjoinedCampagin= function (req,res)
     let ID; let name; let status; let orgUsername; let U_username;
     let address; let description; let startDate; let endDate;
     let progress; let target; let rating; let image; let dontationTypeID; 
+    let process;
     var allCampaigns= new Array();
     campaign.getUserCampaignsIDS(username)
     .then(([IDS])=>{
@@ -434,10 +437,12 @@ exports.getUserjoinedCampagin= function (req,res)
             orgUsername=campaigns[0].Org_username;
             U_username=campaigns[0].U_username;
             dontationTypeID=campaigns[0].DonationType;
+            process=campaigns[0].process;
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
             camp.image=image; camp.target=target; camp.ID=IDS[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+            camp.process=process;
             allCampaigns.push(camp);
 
             if(i==IDS.length-1)
