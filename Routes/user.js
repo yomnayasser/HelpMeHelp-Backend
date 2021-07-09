@@ -14,7 +14,7 @@ router.post('/userSignUp',userCotnroller.UserSignUp);
 router.get('/oldChat/:chatID/:chatType',userCotnroller.getOldMessages);
 router.get('/getChatID/:sender/:reciever/:chatType',userCotnroller.getChatID);
 
-
+//
 
 router.get('/userCountry/:id',userCotnroller.getCountryFromID);
 router.get('/userGov/:id',userCotnroller.getGovFromID);

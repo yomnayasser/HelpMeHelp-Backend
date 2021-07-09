@@ -26,7 +26,7 @@ exports.getChatID=function(req,res){
     chat.get_id(sender,reciever,chatType)
     .then(([Chat_ID])=>{
         //console.log(Chat_ID[0].Chat_ID);
-        res.send(Chat_ID[0].Chat_ID);
+        res.send(Chat_ID[0]);
     })
     .catch(err=>console.log(err));
 }
