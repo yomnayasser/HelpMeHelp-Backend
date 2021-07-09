@@ -11,7 +11,7 @@ class chat
     static save_message(message,sender,Chat_ID,chatType,senderType)
     {
         var d = new Date();
-        const timestamp=d.getFullYear() + "-" + d.getMonth() + "-" +  d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+        const timestamp=d.getFullYear() + "-" + (d.getMonth()+1) + "-" +  d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
         if(chatType=="UU")
         {
             return db.execute("insert into uu_message (ChatID,timestamp,text,Sender_username) values(?,?,?,?)",
@@ -27,12 +27,19 @@ class chat
     {
         if(chatType=="UU")
         {
-            let promise=db.execute("select Chat_ID from uu_chat where Username1=? and Username2=?",[sender,reciever]);
-            promise.then(([Chat_ID])=>{
-                if(Chat_ID.length==0)
+            let promise=db.execute("select Chat_ID from uu_chat where Username1=? and Username2=?",[reciever,sender]);
+            promise.then(([Chat_ID1])=>{
+                if(Chat_ID1.length==0)
                 {
-                    db.execute("insert into uu_chat (Username1,Username2) values(?,?)",
-                    [sender,reciever]);
+                    let promise=db.execute("select Chat_ID from uu_chat where Username1=? and Username2=?",[sender,reciever]);
+                    promise.then(([Chat_ID])=>{
+                        if(Chat_ID.length==0)
+                        {
+                            db.execute("insert into uu_chat (Username1,Username2) values(?,?)",
+                            [sender,reciever]);
+                        }
+                    })
+                    .catch(err=> console.log(err));
                 }
             })
             .catch(err=> console.log(err));
@@ -75,5 +82,22 @@ class chat
             return db.execute("select Timestamp,Text,Sender_username from ou_message where Chat_ID=?",[Chat_ID]);
         }
     }
+    static get_allChats_O(username)
+    {
+        return db.execute("select Chat_ID,U_username from ou_chat where Org_username=?",[username]);
+    }
+    static get_allChats_U1(username)
+    {
+        return db.execute("select Chat_ID,Username1 from uu_chat where Username2=?",[username]);   
+    }
+    static get_allChats_U2(username)
+    {
+        return db.execute("select Chat_ID,Username2 from uu_chat where Username1=?",[username]);   
+    }
+    static get_allChats_U3(username)
+    {
+        return db.execute("select Chat_ID,Org_username from ou_chat where U_username=?",[username]);  
+    }
+
 }
 module.exports=chat;

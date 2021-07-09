@@ -8,17 +8,92 @@ const hotline=require("../Models/hotline");
 const chat=require("../Models/chat");
 var arabicNameToEn = require("arabic-name-to-en")
 
+
+exports.getAllChats=function(req,res){
+    const username=req.params.username;
+    let chatType="";
+    let allChats=[];
+    if(username.substring(0,4)=="Org_")
+    {chatType="OU";}
+    else{chatType="UU";}
+    if(chatType=="OU")
+    {
+        chat.get_allChats_O(username)
+        .then(([chats])=>{
+            allChats=chats;
+            //console.log(allChats);
+            //res.status(200).json({message:'chats'});
+            res.send(allChats);
+        })
+        .catch(err=>console.log(err));
+    }
+    else
+    {
+        chat.get_allChats_U1(username)
+        .then(([chats])=>{
+            allChats=chats;
+            chat.get_allChats_U2(username)
+            .then(([chats])=>{
+                for(let i=0;i<chats.length;i++)
+                {
+                    allChats.push(chats[i]);
+                }
+                chat.get_allChats_U3(username)
+                .then(([chats])=>{
+                    for(let i=0;i<chats.length;i++)
+                    {
+                        allChats.push(chats[i]);
+                    }
+                    //console.log(allChats);
+                    //res.status(200).json({message:'chats'});
+                    var output=allChats.map( s => {
+                        if ( s.hasOwnProperty("Username2") )
+                        {
+                            s.Username1 = s.Username2;
+                            delete s.Username2;   
+                        }
+                        return s;})
+                    var output2=output.map( s => {
+                        if ( s.hasOwnProperty("Org_username") )
+                        {
+                            s.Username1 = s.Org_username;
+                            delete s.Org_username;   
+                        }
+                        return s;})
+                    res.send(output2);
+                })
+                .catch(err=>console.log(err));
+            })
+            .catch(err=>console.log(err));
+        })
+        .catch(err=>console.log(err));
+    }
+}
 exports.getOldMessages=function(req,res){
-    const chatID=req.params.chatID;
-    const chatType=req.params.chatType;
-    console.log(chatID)
-    console.log(chatType)
-    chat.get_old_messages(chatType,chatID)
-    .then(([messages])=>{
-        console.log(messages);
-        res.json(messages);
+    const username=req.params.username;
+    const other_username=req.params.other_username;
+    let chatType="";
+    let chatID=0;
+    if(other_username.substring(0,4)=="Org_")
+    {chatType="OU";}
+    else{chatType="UU";}
+    chat.add_chat(username,other_username,chatType)
+    .then(()=>{
+        chat.get_id(username,other_username,chatType)
+        .then(([Chat_ID])=>{
+            chatID=Chat_ID[0].Chat_ID;
+            chat.get_old_messages(chatType,chatID)
+            .then(([messages])=>{
+                res.send(messages);
+                //console.log(messages);
+                //res.status(200).json({message:'message'});
+            })
+            .catch(err=>console.log(err));
+        })
+        .catch(err=>console.log(err)); 
     })
-    .catch(err=>console.log(err));
+    .catch(err=>console.log(err)); 
+     
 }
 
 exports.getChatID=function(req,res){
@@ -29,23 +104,26 @@ exports.getChatID=function(req,res){
     .then(([Chat_ID])=>{
         //console.log(Chat_ID[0].Chat_ID);
         res.send(Chat_ID[0]);
-
     })
     .catch(err=>console.log(err));
 }
-/*exports.saveMessage=function(req,res){
+exports.saveMessage=function(req,res){
     const message=req.body.message;
     const sender=req.body.sender;
     const chatID=req.body.chatID;
     const chatType=req.body.chatType;
-    const senderType=req.body.senderType;
+    let senderType="";
+    if(sender.substring(0,4)=="Org_")
+    {senderType="org";}
+    else{senderType="user";}
     chat.save_message(message,sender,chatID,chatType,senderType)
     .then(()=>{
-        res.status(200).json({message:'message done'});
+        //res.status(200).json({message:'message done'});
         //console.log(messages);
+        res.send(true);
     })
     .catch(err=>console.log(err));
-}*/
+}
 /*exports.chat=function(req,res){`
     const sender=req.body.sender;
     const reciever=req.body.reciever;
