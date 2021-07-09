@@ -68,11 +68,11 @@ class chat
     {
         if(chatType=="UU")
         {
-            return db.execute("select text,Sender_username from uu_message where ChatID=? ",[Chat_ID]);
+            return db.execute("select Timestamp,text,Sender_username from uu_message where ChatID=? ",[Chat_ID]);
         }
         else
         {
-            return db.execute("select Text,Sender_username from ou_message where Chat_ID=?",[Chat_ID]);
+            return db.execute("select Timestamp,Text,Sender_username from ou_message where Chat_ID=?",[Chat_ID]);
         }
     }
 }

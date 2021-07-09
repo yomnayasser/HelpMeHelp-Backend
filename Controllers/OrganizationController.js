@@ -17,23 +17,23 @@ exports.OrgLogIn=function(req,res)
         }
         else
         {
-            // const decryptedPassword=cryptr.decrypt(Org[0].password);
-            // if(password==decryptedPassword)
-            // {
-            //     res.send(true);
-            // }
-            // else
-            // {
-            //     res.send(false);
-            // }
-            if(password==Org[0].password)
+            const decryptedPassword=cryptr.decrypt(Org[0].password);
+            if(password==decryptedPassword)
             {
-                res.send(true)  
+                res.send(true);
             }
             else
             {
-                res.send(false)
+                res.send(false);
             }
+            // if(password==Org[0].password)
+            // {
+            //     res.send(true)  
+            // }
+            // else
+            // {
+            //     res.send(false)
+            // }
         }
     })
     .catch(err=> console.log(err))
@@ -442,7 +442,17 @@ exports.launchVolunteerOrDonationCampaign= async function (req,res)
                 }).catch(err=>console.log(err));
             }
         }).catch(err=>console.log(err));
-    })    
+    }) 
+}   
+
+exports.getOrgStatus =function(req,res)
+{
+    const username=req.params.id;
+    Organization.getStatus(username)
+    .then(([status])=>{
+        res.json(status[0].request)
+        console.log(status[0].request)
+    })
 }
 
 

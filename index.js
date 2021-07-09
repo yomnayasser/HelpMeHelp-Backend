@@ -7,6 +7,13 @@ var OrgLoginRouter = require('./Routes/OrganizationRouter')
 
 const app=express();
 
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(express.json());
+
+app.use(LoginRouter);
+app.use(AdminRouter);
+app.use(OrgLoginRouter);
+
 //connect to server
 /*app.listen('8080',function(){
     console.log('server started');
@@ -21,20 +28,21 @@ const path = require('path');
 const { Socket } = require('dgram');
 const campaign = require('./Models/campaign');
 
-app.use(bodyParser.urlencoded({extended:false}));
-app.use(express.json());
 
-app.use(LoginRouter);
-app.use(AdminRouter);
-app.use(OrgLoginRouter);
 
 io.on('connection', (socket) => {
-        console.log("connected lololo");
+      console.log("connected lololo");
     socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
+        socket.broadcast.emit('chat message', msg);
+        console.log(msg);
         console.log(socket.id);
     });
+    //socket.on('disconnect', () => {
+      //  console.log("disconnnected")
+        //if(socket)socket.disconnect();
+      //})
 });
+
 
 server.listen(port, () => {
   console.log(`Server running on port: ${port}`)

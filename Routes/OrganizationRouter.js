@@ -10,4 +10,6 @@ OrgRouter.get('/orgApplicants/:id',OrganizationController.getCampaginApplicants)
 OrgRouter.get('/orgAcceptApplicants/:id/:username',OrganizationController.acceptApplicants);
 OrgRouter.get('/orgRejectApplicants/:id/:username',OrganizationController.rejectApplicants);
 OrgRouter.post('/orgAddCampaign/:id',OrganizationController.launchVolunteerOrDonationCampaign);
+OrgRouter.get('/orgStatus/:id',OrganizationController.getOrgStatus);
+
 module.exports=OrgRouter;
