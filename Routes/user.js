@@ -11,7 +11,7 @@ router.post('/join',userCotnroller.join);
 router.get('/search',userCotnroller.search);
 router.post('/userSignUp',userCotnroller.UserSignUp);
 //router.post('/chat',userCotnroller.getOldMessages);
-
+router.post('/userAddCampaign/:id',userCotnroller.launchDonationCampaign);
 router.get('/userCountry/:id',userCotnroller.getCountryFromID);
 router.get('/userGov/:id',userCotnroller.getGovFromID);
 router.get('/userCampagins/:id',userCotnroller.getUserCampaginContributions)

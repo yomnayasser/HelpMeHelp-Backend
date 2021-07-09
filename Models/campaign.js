@@ -4,23 +4,25 @@ var arabicNameToEn = require("arabic-name-to-en")
 const smartSearch = require('smart-search')
 
 class campaign {
-    constructor(ID,name,status,orgUsername,U_username,address,description,startDate,endDate,progress,target,rating,image,LaunchingCampaignStrategy,dontationTypeID,campaignFactory){
-        this.ID=ID;
+    constructor(name,status,orgUsername,U_username,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink){
+        // this.ID=ID;
         this.name=name;
         this.status=status;
         this.orgUsername=orgUsername;
         this.U_username=U_username;
         this.address=address;
         this.description=description;
+        this.process=process;
         this.startDate=startDate;
         this.endDate=endDate;
         this.progress=progress;
         this.target=target;
-        this.rating=rating;
+        // this.rating=rating;
         this.image=image;
         this.dontationTypeID=dontationTypeID;
-        this.LaunchingCampaignStrategy=LaunchingCampaignStrategy;
-        this.campaignFactory=campaignFactory;
+        this.QuizLink=QuizLink;
+        // this.LaunchingCampaignStrategy=LaunchingCampaignStrategy;
+        // this.campaignFactory=campaignFactory;
     }
     static getCampaginDeitals(campaign_id)
     {
@@ -113,8 +115,36 @@ class campaign {
     {
         return db.execute('Select * from campaign where Campaign_ID=?',[ID]);
     }
-
-
+    
+    static getCampaignDonationTypeIDfromName(dontationTypeName)
+    {
+        return db.execute('select id from donation_type where Type=?',[dontationTypeName]);
+    }
+    addVolunteeringOrDonationCampaign()
+    {
+        return db.query('insert into campaign(name,address,status,quizlink,description,image,target,startdate,enddate,progress,org_username,u_username,donationtype,process) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        ,[this.name,this.address,this.status,this.QuizLink,this.description,this.image,this.target,this.startDate,this.endDate,this.progress,this.orgUsername,this.U_username,this.dontationTypeID,this.process]);
+    }
+    static addCampaignToEmbedCampaign(id)
+    {
+        return db.execute('SELECT MAX(campaign_embed) as maxid FROM campaign_embed').then(([maxid])=>{
+            if(maxid[0]==null)
+            {
+                return db.execute('insert into campaign_embed values(?,?)',[id,1]);  
+            }
+            else{
+                return db.execute('insert into campaign_embed values(?,?)',[id,(maxid[0].maxid+1)]);
+            }
+        })
+    }
+    static updateFinishedCampaignsStatus(campaign_id)
+    {
+        return db.execute('update campaign set status=? where campaign_id=?',["finished",campaign_id]);
+    }
+    static updateToOngoingCampaignsStatus(campaign_id)
+    {
+        return db.execute('update campaign set status=? where campaign_id=?',["ongoing",campaign_id]);
+    }
     //calculateRating(double);
     //checkEnd();
     //excuteLaunchingStrategy();

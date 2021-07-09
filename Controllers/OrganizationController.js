@@ -399,7 +399,51 @@ exports.rejectApplicants= function (req,res)
     .catch(err=> console.log(err));
 }
 
+exports.launchVolunteerOrDonationCampaign= async function (req,res)
+{
+    const orgUsername= req.params.id;
+    const name = req.body.name;
+    const status = "upcoming"
+    const address = req.body.address;
+    const description = req.body.description;
+    let process=req.body.process;
+    const startDate = req.body.StartDate;
+    let endDate = req.body.EndDate;
+    const progress = 0;
+    const target = req.body.target;
+    let image = req.body.image;
+    const dontationTypeName = req.body.DonationType;
+    let QuizLink=req.body.QuizLink;
 
+    Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
+        const dontationTypeID= id[0].id;
+        if(QuizLink==null)
+        {
+            QuizLink="Not Found";
+        }
+        if(image==null)
+        {
+            image="Not Found";
+        }
+        // if(endDate==null)
+        // {
+        //     endDate="Not Found";
+        // }
+        if(process==null)
+        {
+            process="Not Found";
+        }
+        const camp=new Campaign(name,status,orgUsername,null,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink);
+        camp.addVolunteeringOrDonationCampaign().then(function([result]){
+            if(result['insertId'])
+            {
+                Campaign.addCampaignToEmbedCampaign(result['insertId']).then(()=>{
+                    res.send('Done');
+                }).catch(err=>console.log(err));
+            }
+        }).catch(err=>console.log(err));
+    })    
+}
 
 
 

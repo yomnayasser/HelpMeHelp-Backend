@@ -241,7 +241,7 @@ class Organization extends account
 
     calculateRating()
     {
-
+        
     }
     excuteRegisterStrategy()
     {
