@@ -8,17 +8,92 @@ const hotline=require("../Models/hotline");
 const chat=require("../Models/chat");
 var arabicNameToEn = require("arabic-name-to-en")
 
+
+exports.getAllChats=function(req,res){
+    const username=req.params.username;
+    let chatType="";
+    let allChats=[];
+    if(username.substring(0,4)=="Org_")
+    {chatType="OU";}
+    else{chatType="UU";}
+    if(chatType=="OU")
+    {
+        chat.get_allChats_O(username)
+        .then(([chats])=>{
+            allChats=chats;
+            //console.log(allChats);
+            //res.status(200).json({message:'chats'});
+            res.send(allChats);
+        })
+        .catch(err=>console.log(err));
+    }
+    else
+    {
+        chat.get_allChats_U1(username)
+        .then(([chats])=>{
+            allChats=chats;
+            chat.get_allChats_U2(username)
+            .then(([chats])=>{
+                for(let i=0;i<chats.length;i++)
+                {
+                    allChats.push(chats[i]);
+                }
+                chat.get_allChats_U3(username)
+                .then(([chats])=>{
+                    for(let i=0;i<chats.length;i++)
+                    {
+                        allChats.push(chats[i]);
+                    }
+                    //console.log(allChats);
+                    //res.status(200).json({message:'chats'});
+                    var output=allChats.map( s => {
+                        if ( s.hasOwnProperty("Username2") )
+                        {
+                            s.Username1 = s.Username2;
+                            delete s.Username2;   
+                        }
+                        return s;})
+                    var output2=output.map( s => {
+                        if ( s.hasOwnProperty("Org_username") )
+                        {
+                            s.Username1 = s.Org_username;
+                            delete s.Org_username;   
+                        }
+                        return s;})
+                    res.send(output2);
+                })
+                .catch(err=>console.log(err));
+            })
+            .catch(err=>console.log(err));
+        })
+        .catch(err=>console.log(err));
+    }
+}
 exports.getOldMessages=function(req,res){
-    const chatID=req.params.chatID;
-    const chatType=req.params.chatType;
-    console.log(chatID)
-    console.log(chatType)
-    chat.get_old_messages(chatType,chatID)
-    .then(([messages])=>{
-        console.log(messages);
-        res.json(messages);
+    const username=req.params.username;
+    const other_username=req.params.other_username;
+    let chatType="";
+    let chatID=0;
+    if(other_username.substring(0,4)=="Org_")
+    {chatType="OU";}
+    else{chatType="UU";}
+    chat.add_chat(username,other_username,chatType)
+    .then(()=>{
+        chat.get_id(username,other_username,chatType)
+        .then(([Chat_ID])=>{
+            chatID=Chat_ID[0].Chat_ID;
+            chat.get_old_messages(chatType,chatID)
+            .then(([messages])=>{
+                res.send(messages);
+                //console.log(messages);
+                //res.status(200).json({message:'message'});
+            })
+            .catch(err=>console.log(err));
+        })
+        .catch(err=>console.log(err)); 
     })
-    .catch(err=>console.log(err));
+    .catch(err=>console.log(err)); 
+     
 }
 
 exports.getChatID=function(req,res){
@@ -26,25 +101,29 @@ exports.getChatID=function(req,res){
     const reciever=req.params.reciever;
     const chatType=req.params.chatType;
     chat.get_id(sender,reciever,chatType)
-    .then(([ChatID])=>{
-        //console.log(ChatID[0].Chat_ID);
-       res.json(ChatID[0].Chat_ID);
+    .then(([Chat_ID])=>{
+        //console.log(Chat_ID[0].Chat_ID);
+        res.send(Chat_ID[0]);
     })
     .catch(err=>console.log(err));
 }
-/*exports.saveMessage=function(req,res){
+exports.saveMessage=function(req,res){
     const message=req.body.message;
     const sender=req.body.sender;
     const chatID=req.body.chatID;
     const chatType=req.body.chatType;
-    const senderType=req.body.senderType;
+    let senderType="";
+    if(sender.substring(0,4)=="Org_")
+    {senderType="org";}
+    else{senderType="user";}
     chat.save_message(message,sender,chatID,chatType,senderType)
     .then(()=>{
-        res.status(200).json({message:'message done'});
+        //res.status(200).json({message:'message done'});
         //console.log(messages);
+        res.send(true);
     })
     .catch(err=>console.log(err));
-}*/
+}
 /*exports.chat=function(req,res){`
     const sender=req.body.sender;
     const reciever=req.body.reciever;
@@ -96,7 +175,7 @@ exports.search=function(req,res){
 exports.join=function(req,res){
     const campid=req.body.campid;
     const username=req.body.username;
-    const userstate=req.body.userstate;
+    const userstate="pending";
     User.joinCampaign(campid,username,userstate)
     .then(()=>{
         res.status(200).json({message:'join done'});
@@ -107,8 +186,8 @@ exports.donate=function(req,res){
     const campid=req.body.campid;
     const username=req.body.username;
     const amount=req.body.amount;
-    const date=req.body.date;
-    User.donate(amount,campid,username,date)
+    const request_donation="pending"
+    User.donate(amount,campid,username,request_donation)
     .then(()=>{
         res.status(200).json({message:'donation done'});
     })
@@ -238,7 +317,8 @@ exports.getAllCampagins= function (req,res)
 {
     let ID; let name; let status; let orgUsername; let U_username;
     let address; let description; let startDate; let endDate;
-    let progress; let target; let rating; let image; let dontationTypeID; 
+    let progress; let target; let rating; let image; let dontationTypeID;
+    let process; 
     var allCampaigns= new Array();
     campaign.getAllCampaigns()
     .then(([campaigns])=>{
@@ -257,11 +337,12 @@ exports.getAllCampagins= function (req,res)
             target=campaigns[i].Target;
             orgUsername=campaigns[i].Org_username;
             U_username=campaigns[i].U_username;
+            process=campaigns[i].process;
             dontationTypeID=campaigns[i].DonationType;
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID;
+            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID; camp.process=process;
             allCampaigns.push(camp);
 
             if(i==campaigns.length-1)
@@ -333,6 +414,7 @@ exports.getUserjoinedCampagin= function (req,res)
     let ID; let name; let status; let orgUsername; let U_username;
     let address; let description; let startDate; let endDate;
     let progress; let target; let rating; let image; let dontationTypeID; 
+    let process;
     var allCampaigns= new Array();
     campaign.getUserCampaignsIDS(username)
     .then(([IDS])=>{
@@ -355,10 +437,12 @@ exports.getUserjoinedCampagin= function (req,res)
             orgUsername=campaigns[0].Org_username;
             U_username=campaigns[0].U_username;
             dontationTypeID=campaigns[0].DonationType;
+            process=campaigns[0].process;
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
             camp.image=image; camp.target=target; camp.ID=IDS[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+            camp.process=process;
             allCampaigns.push(camp);
 
             if(i==IDS.length-1)
@@ -422,4 +506,66 @@ exports.UserSignUp=function(req,res)
             }
         })
         .catch(err=> console.log(err));
+}
+exports.AcceptDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+    const username=req.params.username;
+    campaign.getDonationValue(campaign_id,username).then(([result])=>{
+        campaign.add_donor(campaign_id,username,new Date(),result[0].Donation_val)
+        .then((done)=>{
+            res.send(done);
+        })
+        .catch(err=> console.log(err));
+    })
+}
+exports.RejectDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+    const username=req.params.username;
+    campaign.reject_donor(campaign_id,username)
+        .then((done)=>{
+            res.send(done);
+        })
+        .catch(err=> console.log(err));
+}
+exports.launchDonationCampaign= async function (req,res)
+{
+    const Username= req.params.id;
+    const name = req.body.name;
+    const status = "upcoming"
+    const address = req.body.address;
+    const description = req.body.description;
+    let process=req.body.process;
+    const startDate = req.body.StartDate;
+    let endDate = req.body.EndDate;
+    const progress = 0;
+    const target = req.body.target;
+    let image = req.body.image;
+    const dontationTypeName = req.body.DonationType;
+
+    campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
+        const dontationTypeID= id[0].id;
+        if(image==null)
+        {
+            image="Not Found";
+        }
+        // if(endDate==null)
+        // {
+        //     endDate="Not Found";
+        // }
+        if(process==null)
+        {
+            process="Not Found";
+        }
+        const camp=new campaign(name,status,null,Username,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,null);
+        camp.addVolunteeringOrDonationCampaign().then(function([result]){
+            if(result['insertId'])
+            {
+                campaign.addCampaignToEmbedCampaign(result['insertId']).then(()=>{
+                    res.send('Done');
+                }).catch(err=>console.log(err));
+            }
+        }).catch(err=>console.log(err));
+    })    
 }

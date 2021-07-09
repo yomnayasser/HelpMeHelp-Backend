@@ -46,7 +46,7 @@ exports.OrgProfile=async function(req,res)
     let categoryID;let categoryName; let name; let password;
     let description; let purpose; let website; let organizationTypeID;
     let rating; let logo; let email; let requestStatus; let organizationTypeName;
-    let phoneNumber; let countryID; let countryName; let GovernorateID; let GovernorateName; let hotlineTemp;
+    let phoneNumber; let countryID; let countryName; let GovernorateID; let GovernorateName; let hotlineTemp; let hotlineDesc;
     let SubcategoryID; let SubcategoryName; var socailMediaLinksArray = new Array(); var locationArray = new Array();
     await Organization.getOrg(username)
     .then(([org])=>{
@@ -57,7 +57,7 @@ exports.OrgProfile=async function(req,res)
           phoneNumber=org[0].phone_num;  countryID=org[0].country_id;  GovernorateID=org[0].governorate_id;
           if(org[0].website==null)
           {
-            website="No website availble"
+            website="NA"
           }
           else
           {
@@ -65,7 +65,7 @@ exports.OrgProfile=async function(req,res)
           }
           if(org[0].logo==null)
           {
-            logo="No Image"
+            logo="NA"
           }
         //   password=cryptr.decrypt(org[0].password);
     })
@@ -137,10 +137,21 @@ exports.OrgProfile=async function(req,res)
         .then(([hotline])=>{
             if(hotline[0]==null)
             {
-                hotlineTemp="No hotline number"
+                hotlineTemp="NA"
             }
             else{
             hotlineTemp=hotline[0].Number;
+            }
+        })
+        .catch(err=> console.log(err))
+        await Organization.getHotlineDesc(username)
+        .then(([hotline])=>{
+            if(hotline[0]==null)
+            {
+                hotlineDesc="NA"
+            }
+            else{
+                hotlineDesc=hotline[0].Description;
             }
         })
         .catch(err=> console.log(err))
@@ -149,7 +160,7 @@ exports.OrgProfile=async function(req,res)
         .then(([links])=>{
             if(links.length==0)
             {
-                Org.socialMedia="No social media links"
+                Org.socialMedia="NA"
             }
             else{
             for(let i=0;i<links.length;i++)
@@ -161,7 +172,7 @@ exports.OrgProfile=async function(req,res)
         })
         .catch(err=> console.log(err))
     Org.name=name; Org.userName=username; Org.password=password;Org.country=countryName; Org.Governorate=GovernorateName;
-    Org.subCategory=SubcategoryName; Org.category=categoryName; Org.email=email;
+    Org.subCategory=SubcategoryName; Org.category=categoryName; Org.email=email; Org.hotline=[hotlineTemp,hotlineDesc]
    Org.organizationType=organizationTypeName; Org.description=description; Org.purpose=purpose; Org.rating=rating;
    Org.website=website; Org.logo=logo; Org.requestStatus=requestStatus; Org.phoneNumber=phoneNumber; Org.location=locationArray;
    Org.hotline=hotlineTemp; Org.socialMedia=socailMediaLinksArray;
@@ -181,7 +192,7 @@ exports.UpdatePorfile=async function(req,res)
     const new_category=req.body.category;const new_description=req.body.description;
     const new_purpose=req.body.purpose;const new_rating=req.body.rating;
     const new_website=req.body.website;const new_socialMedia=req.body.socialMedia;
-    const new_hotline=req.body.hotline;const new_logo=req.body.logo;
+    const new_hotline=req.body.hotline;const new_logo=req.body.logo; const new_hotlineDesc=req.body.hotlineDesc;
     const new_requestStatus=req.body.requestStatus;const new_location=req.body.location;
     const new_phoneNumber=req.body.phoneNumber;const new_SubCategory=req.body.SubCategory;
     const new_orgType=req.body.orgType;
@@ -214,7 +225,7 @@ exports.UpdatePorfile=async function(req,res)
 
         const hashedPassword=cryptr.encrypt(new_password);
         const updatedOrg=new Organization(new_name,org_Username,hashedPassword,new_country,new_governorate,new_email,new_category,new_SubCategory,new_orgType
-            ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_logo,new_requestStatus,new_phoneNumber,new_location);
+            ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_hotlineDesc,new_logo,new_requestStatus,new_phoneNumber,new_location);
          
             updatedOrg.updateProfileData(org_Username)
         .then(res.send(true))
@@ -230,6 +241,7 @@ exports.getOrgCampaigns=function(req,res)
     const username=req.params.id;
     let name; let status; let dontationTypeID; let address;let image; let campID;
     let description; let startDate; let endDate; let progress;let target; let id;
+    let process;
     var campaginsDeitals = new Array();
 
      
@@ -254,11 +266,12 @@ exports.getOrgCampaigns=function(req,res)
                 endDate=campaign[0].EndDate;
                 progress=campaign[0].Progress;
                 target=campaign[0].Target;
+                process=campaign[0].process;
                 dontationTypeID=campaign[0].DonationType;
 
                 camp.name=name; camp.status=status;camp.orgUsername=username; camp.startDate=startDate;
                 camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-                camp.image=image; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+                camp.image=image;camp.process=process; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
                 campaginsDeitals.push(camp); 
                 //console.log(campaginsDeitals.length)
                 if(i==ID.length-1)
@@ -298,6 +311,7 @@ exports.OrgSignUp=function(req,res)
     const location=req.body.location; 
     const phoneNumber=req.body.phoneNumber;
     const encryptedPassword=cryptr.encrypt(password);
+
     const org=new Organization(name,userName,encryptedPassword,country,Governorate,email,category,subCategory,
         organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location);
         Organization.getOrg(userName).then(([found])=>{
@@ -389,7 +403,6 @@ exports.acceptApplicants= function (req,res)
     .then(res.send(true))
     .catch(err=> console.log(err));
 }
-
 exports.rejectApplicants= function (req,res)
 {
     const ID=req.params.id;
@@ -399,6 +412,52 @@ exports.rejectApplicants= function (req,res)
     .catch(err=> console.log(err));
 }
 
+exports.launchVolunteerOrDonationCampaign= async function (req,res)
+{
+    const orgUsername= req.params.id;
+    const name = req.body.name;
+    const status = "upcoming"
+    const address = req.body.address;
+    const description = req.body.description;
+    let process=req.body.process;
+    const startDate = req.body.StartDate;
+    let endDate = req.body.EndDate;
+    const progress = 0;
+    const target = req.body.target;
+    let image = req.body.image;
+    const dontationTypeName = req.body.DonationType;
+    let QuizLink=req.body.QuizLink;
+
+    Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
+        const dontationTypeID= id[0].id;
+        if(QuizLink==null)
+        {
+            QuizLink="Not Found";
+        }
+        if(image==null)
+        {
+            image="Not Found";
+        }
+        // if(endDate==null)
+        // {
+        //     endDate="Not Found";
+        // }
+        if(process==null)
+        {
+            process="Not Found";
+        }
+        const camp=new Campaign(name,status,orgUsername,null,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink);
+        camp.addVolunteeringOrDonationCampaign().then(function([result]){
+            if(result['insertId'])
+            {
+                Campaign.addCampaignToEmbedCampaign(result['insertId']).then(()=>{
+                    res.send('Done');
+                }).catch(err=>console.log(err));
+            }
+        }).catch(err=>console.log(err));
+    }) 
+}   
+
 exports.getOrgStatus =function(req,res)
 {
     const username=req.params.id;
@@ -407,7 +466,6 @@ exports.getOrgStatus =function(req,res)
         res.json(status[0].request)
         console.log(status[0].request)
     })
-
 }
 
 

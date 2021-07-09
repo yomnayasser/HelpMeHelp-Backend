@@ -73,51 +73,32 @@ class User extends account
         }))
         .catch(err=> console.log(err));
     }
-    static donate(amount,campID,username,date)
+    static donate(Donation_val,campaign_id,username,RequestStatus)
     {
-        let promise=campaign.get_targetandprogress(campID);
-        promise.then(([rows])=>{
-            let row=rows[0];
-            let target=parseFloat(row.Target);
-            let Progress=parseFloat(row.Progress);
-            let new_progress=Progress+amount;
-            if(new_progress==target)
-            {
-                campaign.change_status_to_complete(campID);
-            }
-            
-            campaign.update_progress(new_progress,campID);
-            //console.log(date);
-            return db.execute('INSERT INTO `join` VALUES (?, ?, ?, ?)',
-            [campID,username,amount,date]);
-        })
-        .catch(err=> console.log(err));
-        return promise;
+        return db.execute('INSERT INTO request_donation VALUES (?, ?, ?, ?)',
+        [campaign_id,username,Donation_val,RequestStatus]);
     }
     static joinCampaign(campaign_id,username,userstate)
     {
         return db.execute('INSERT INTO `approve` VALUES (?, ?, ?)',
         [campaign_id,username,userstate]);
     }
-    static approveJoinRequest(campaign_id,username,date)
-    {
-        campaign.add_volunteer(campaign_id);
-        db.execute('INSERT INTO `join`(Campaign_ID,Username,Date_join) VALUES (?, ?, ?)',
-        [campaign_id,username,date]);
-        // return db.execute('Delete from approve where CampaignID=? and Username=?',
-        // [campaign_id,username]);
-
-    }
+    // static approveDonorRequest(campaign_id,username,Donation_val)
+    // {
+    //     campaign.add_donor(campaign_id,username,new Date(),Donation_val);
+    //     // return db.execute('Delete from approve where CampaignID=? and Username=?',
+    //     // [campaign_id,username]);
+    // }
     static get_donation_history(username)
     {
         return db.execute('select Campaign_ID,Donation_val,Date_join from `join` where Username=? and Donation_val is not null',
         [username]);
     }
-    updateZakat(double)
+    static get_volunteer_history(username)
     {
-
+        return db.execute('select Campaign_ID,Date_join from `join` where Username=? and Donation_val is null',
+        [username]);
     }
-
     static getUserRole(username)
     {
         return db.execute('Select role from user where Username = ?',[username]);
@@ -133,7 +114,18 @@ class User extends account
             return this.getCountryID(this.country).then(([countryID])=>{
                 this.getGovernorateID(this.Governorate).then(([governorateID])=>{
                     db.execute('insert into user values(?,?,?,?,?,?,?,?,?,?,?)'
-                    ,[this.userName,this.name,this.age,this.address,this.email,this.image,this.password,this.role,this.birthday,countryID[0].ID,governorateID[0].ID]);
+                    ,[this.userName,this.name,this.age,this.address,this.email,this.image,this.password,this.role,this.birthday,countryID[0].ID,governorateID[0].ID])
+                    .then(()=>{
+                        db.execute('SELECT MAX(embed_user) as maxid FROM user_embed').then(([maxid])=>{
+                            if(maxid[0]==null)
+                            {
+                                return db.execute('insert into user_embed values(?,?)',[this.userName,1]);  
+                            }
+                            else{
+                                return db.execute('insert into user_embed values(?,?)',[this.userName,(maxid[0].maxid+1)]);
+                            }
+                        })
+                    })
                 }).catch(err=> console.log(err));
             })
         }

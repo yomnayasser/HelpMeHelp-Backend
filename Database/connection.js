@@ -22,9 +22,8 @@ const db=mysql.createConnection({
 
     // password:'database',
 
-
-    //password:'project123',
-    namedPlaceholders:true,
+    // password:'project123',
+    namedPlaceholders:true
 });
 
 //connect to db

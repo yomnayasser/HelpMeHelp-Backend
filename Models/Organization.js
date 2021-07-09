@@ -1,6 +1,7 @@
 const account=require("./account");
 var db=require('../Database/connection');
-const smartSearch = require('smart-search')
+const smartSearch = require('smart-search');
+const campaign = require("./campaign");
 class Organization extends account
 {
     constructor(name,userName,password,country,Governorate,email,category,subCategory,organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location)
@@ -75,6 +76,10 @@ class Organization extends account
     static getHotline(username)
     {
         return db.execute('Select Number from hotline where Org_username=? ',[username]);
+    }
+    static getHotlineDesc(username)
+    {
+        return db.execute('Select Description from hotline where Org_username=? ',[username]);
     }
 
     static getSocailMedia(username)
@@ -207,9 +212,11 @@ class Organization extends account
                 })).catch(err=> console.log(err))
                 .then(()=>{
                     if(!this.hotline==0)
-                    db.execute('insert into hotline values (?,?,?)',[this.hotline[0],this.userName,this.hotline[1]]);
-                }
-                )
+                    {
+                        db.execute('insert into hotline values (?,?,?)'
+                        ,[this.hotline[0],this.userName,this.hotline[1]]);
+                    }
+            })
                 .then(()=>{
                     for(let i=0;i<this.socialMedia.length;i++)
                     {
@@ -236,11 +243,37 @@ class Organization extends account
     
     static changeStatusAccepted(ID,username)
     {
-        return db.execute('UPDATE `approve` SET Userstate="Accepted" where CampaignID=? and Username=?',[ID,username]);
+        return db.execute('select donationType from campaign where campaign_id=?',[ID])
+        .then(([donation_type_id])=>{
+            campaign.getDonationTypeNameFromId(donation_type_id[0].ID).then(([name])=>{
+                if(name[0].type=="none")
+                {
+                    campaign.add_volunteer(ID,username,new Date());
+                }
+                else
+                {
+                    campaign.getDonationValue(ID,username).then(([result])=>{
+                        campaign.add_donor(ID,username,new Date(),result[0].Donation_val);
+                    }).catch(err=> console.log(err));
+                }
+            })
+        })
     }
     static changeStatusRejected(ID,username)
     {
-        return db.execute('UPDATE `approve` SET Userstate="Rejected" where CampaignID=? and Username=?',[ID,username]);
+        return db.execute('select donationType from campaign where campaign_id=?',[ID])
+        .then(([donation_type_id])=>{
+            campaign.getDonationTypeNameFromId(donation_type_id[0].donationType).then(([name])=>{
+                if(name[0].type=="none")
+                {
+                    campaign.reject_volunteer(ID,username);
+                }
+                else
+                {
+                    campaign.reject_donor(ID,username);
+                }
+            })
+        })
     }
     static getStatus(username)
     {
