@@ -10,11 +10,10 @@ const db=mysql.createConnection({
    database:'helpmehelp',
      //password:'database',
 
-    // password:'sarafares1999',
+    password:'sarafares1999',
 
     //database:'helpmehelp',
    //database:'helpmehelpdb',
-    // password:'database',
     //database:'helpmehelp',
   // database:'helpmehelpdb',
 

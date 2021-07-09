@@ -47,7 +47,7 @@ exports.OrgProfile=async function(req,res)
     let categoryID;let categoryName; let name; let password;
     let description; let purpose; let website; let organizationTypeID;
     let rating; let logo; let email; let requestStatus; let organizationTypeName;
-    let phoneNumber; let countryID; let countryName; let GovernorateID; let GovernorateName; let hotlineTemp;
+    let phoneNumber; let countryID; let countryName; let GovernorateID; let GovernorateName; let hotlineTemp; let hotlineDesc;
     let SubcategoryID; let SubcategoryName; var socailMediaLinksArray = new Array(); var locationArray = new Array();
     await Organization.getOrg(username)
     .then(([org])=>{
@@ -58,7 +58,7 @@ exports.OrgProfile=async function(req,res)
           phoneNumber=org[0].phone_num;  countryID=org[0].country_id;  GovernorateID=org[0].governorate_id;
           if(org[0].website==null)
           {
-            website="No website availble"
+            website="NA"
           }
           else
           {
@@ -66,7 +66,7 @@ exports.OrgProfile=async function(req,res)
           }
           if(org[0].logo==null)
           {
-            logo="No Image"
+            logo="NA"
           }
         //   password=cryptr.decrypt(org[0].password);
     })
@@ -138,10 +138,21 @@ exports.OrgProfile=async function(req,res)
         .then(([hotline])=>{
             if(hotline[0]==null)
             {
-                hotlineTemp="No hotline number"
+                hotlineTemp="NA"
             }
             else{
             hotlineTemp=hotline[0].Number;
+            }
+        })
+        .catch(err=> console.log(err))
+        await Organization.getHotlineDesc(username)
+        .then(([hotline])=>{
+            if(hotline[0]==null)
+            {
+                hotlineDesc="NA"
+            }
+            else{
+                hotlineDesc=hotline[0].Description;
             }
         })
         .catch(err=> console.log(err))
@@ -150,7 +161,7 @@ exports.OrgProfile=async function(req,res)
         .then(([links])=>{
             if(links.length==0)
             {
-                Org.socialMedia="No social media links"
+                Org.socialMedia="NA"
             }
             else{
             for(let i=0;i<links.length;i++)
@@ -162,7 +173,7 @@ exports.OrgProfile=async function(req,res)
         })
         .catch(err=> console.log(err))
     Org.name=name; Org.userName=username; Org.password=password;Org.country=countryName; Org.Governorate=GovernorateName;
-    Org.subCategory=SubcategoryName; Org.category=categoryName; Org.email=email;
+    Org.subCategory=SubcategoryName; Org.category=categoryName; Org.email=email; Org.hotline=[hotlineTemp,hotlineDesc]
    Org.organizationType=organizationTypeName; Org.description=description; Org.purpose=purpose; Org.rating=rating;
    Org.website=website; Org.logo=logo; Org.requestStatus=requestStatus; Org.phoneNumber=phoneNumber; Org.location=locationArray;
    Org.hotline=hotlineTemp; Org.socialMedia=socailMediaLinksArray;
@@ -182,7 +193,7 @@ exports.UpdatePorfile=async function(req,res)
     const new_category=req.body.category;const new_description=req.body.description;
     const new_purpose=req.body.purpose;const new_rating=req.body.rating;
     const new_website=req.body.website;const new_socialMedia=req.body.socialMedia;
-    const new_hotline=req.body.hotline;const new_logo=req.body.logo;
+    const new_hotline=req.body.hotline;const new_logo=req.body.logo; const new_hotlineDesc=req.body.hotlineDesc;
     const new_requestStatus=req.body.requestStatus;const new_location=req.body.location;
     const new_phoneNumber=req.body.phoneNumber;const new_SubCategory=req.body.SubCategory;
     const new_orgType=req.body.orgType;
@@ -215,7 +226,7 @@ exports.UpdatePorfile=async function(req,res)
 
         const hashedPassword=cryptr.encrypt(new_password);
         const updatedOrg=new Organization(new_name,org_Username,hashedPassword,new_country,new_governorate,new_email,new_category,new_SubCategory,new_orgType
-            ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_logo,new_requestStatus,new_phoneNumber,new_location);
+            ,new_description,new_purpose,new_rating,new_website,new_socialMedia,new_hotline,new_hotlineDesc,new_logo,new_requestStatus,new_phoneNumber,new_location);
          
             updatedOrg.updateProfileData(org_Username)
         .then(res.send(true))

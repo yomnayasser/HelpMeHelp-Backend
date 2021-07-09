@@ -16,10 +16,11 @@ router.get('/user/rejectDonationRequests/:id/:username',userCotnroller.RejectDon
 router.post('/userAddCampaign/:id',userCotnroller.launchDonationCampaign);
 
 /////////chat///////////
-router.get('/oldChat/:chatID/:chatType',userCotnroller.getOldMessages);
+router.get('/oldChat/:username/:other_username',userCotnroller.getOldMessages);
 router.get('/getChatID/:sender/:reciever/:chatType',userCotnroller.getChatID);
 
-//
+router.post('/saveMessage',userCotnroller.saveMessage);
+router.get('/allchats/:username',userCotnroller.getAllChats);
 router.get('/userCountry/:id',userCotnroller.getCountryFromID);
 router.get('/userGov/:id',userCotnroller.getGovFromID);
 router.get('/userCampagins/:id',userCotnroller.getUserCampaginContributions)

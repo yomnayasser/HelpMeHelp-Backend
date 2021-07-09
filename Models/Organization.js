@@ -77,6 +77,10 @@ class Organization extends account
     {
         return db.execute('Select Number from hotline where Org_username=? ',[username]);
     }
+    static getHotlineDesc(username)
+    {
+        return db.execute('Select Description from hotline where Org_username=? ',[username]);
+    }
 
     static getSocailMedia(username)
     {
