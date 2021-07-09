@@ -5,6 +5,7 @@ const cryptr = new Cryptr('myTotalySecretKey');
 const Organization=require('../Models/Organization');
 const Campaign=require('../Models/campaign');
 const User=require('../Models/User');
+const campaign = require('../Models/campaign');
 exports.OrgLogIn=function(req,res)
 {
     const username=req.body.username;
@@ -298,6 +299,7 @@ exports.OrgSignUp=function(req,res)
     const location=req.body.location; 
     const phoneNumber=req.body.phoneNumber;
     const encryptedPassword=cryptr.encrypt(password);
+
     const org=new Organization(name,userName,encryptedPassword,country,Governorate,email,category,subCategory,
         organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location);
         Organization.getOrg(userName).then(([found])=>{
@@ -389,7 +391,6 @@ exports.acceptApplicants= function (req,res)
     .then(res.send(true))
     .catch(err=> console.log(err));
 }
-
 exports.rejectApplicants= function (req,res)
 {
     const ID=req.params.id;

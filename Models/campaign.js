@@ -29,6 +29,11 @@ class campaign {
         return db.execute('select * from campaign where Campaign_ID=?',
         [campaign_id]);
     }
+    static getDonationType(campaign_id)
+    {
+        return db.execute('select DonationType from campaign where Campaign_ID=?',
+        [campaign_id]);
+    }
     static get_targetandprogress(campaign_id)
     {
         return db.execute('select Progress,Target from campaign where Campaign_ID=?',
@@ -44,7 +49,7 @@ class campaign {
         return db.execute('update campaign set Progress=? where Campaign_ID =?',
         [new_progress,campaign_id]);
     }
-    static add_volunteer(campaign_id)
+    static add_volunteer(campaign_id,username,date)
     {
         let promise=this.get_targetandprogress(campaign_id);
         promise.then(([rows])=>{
@@ -57,14 +62,48 @@ class campaign {
                 this.change_status_to_complete(campaign_id);
             }
             this.update_progress(new_progress,campaign_id);
-
+            return db.execute('INSERT INTO `join`(Campaign_ID,Username,Date_join) VALUES (?, ?, ?)',
+            [campaign_id,username,date]).then(()=>{
+                db.execute('update `approve` Set userstate=? where campaignid=? and username= ?'
+                ,["accepted",campaign_id,username]);
+            })
         })
         .catch(err=> console.log(err));
         return promise;
     }
-    static add_donation_campaign()
+    static reject_volunteer(campaign_id,username)
     {
-        
+        return db.execute('update `approve` Set userstate=? where campaignid=? and username= ?'
+        ,["Rejeted",campaign_id,username]);
+    }
+    static reject_donor(campaign_id,username)
+    {
+        return db.execute('update request_donation Set request_status=? where campaign_id=? and username= ?'
+        ,["Rejeted",campaign_id,username]);
+    }
+    static add_donor(campaign_id,username,date,Donation_val)
+    {
+        let promise=this.get_targetandprogress(campaign_id);
+         promise.then(([rows])=>{
+            let row=rows[0];
+            let target=parseFloat(row.Target);
+            let Progress=parseFloat(row.Progress);
+            let new_progress=Progress+Donation_val;
+            if(new_progress==target)
+            {
+                campaign.change_status_to_complete(campaign_id);
+            }       
+            campaign.update_progress(new_progress,campaign_id);
+            //console.log(date);
+            console.log(campaign_id,"+",username,"+",Donation_val,"+",date)
+            return db.execute('INSERT INTO `join` VALUES (?, ?, ?, ?)',
+            [campaign_id,username,Donation_val,date]).then(()=>{
+                db.execute('update request_donation Set Request_status=? where campaign_id=? and username= ?'
+                ,["accepted",campaign_id,username]);
+            })
+    })
+    .catch(err=> console.log(err));
+    return promise;
     }
     static search(startRow,rowCount,text)
     {
@@ -115,7 +154,10 @@ class campaign {
     {
         return db.execute('Select * from campaign where Campaign_ID=?',[ID]);
     }
-    
+    static getDonationTypeNameFromId(dontationTypeID)
+    {
+        return db.execute('select type from donation_type where ID=?',[dontationTypeID]);
+    }    
     static getCampaignDonationTypeIDfromName(dontationTypeName)
     {
         return db.execute('select id from donation_type where Type=?',[dontationTypeName]);
@@ -144,6 +186,11 @@ class campaign {
     static updateToOngoingCampaignsStatus(campaign_id)
     {
         return db.execute('update campaign set status=? where campaign_id=?',["ongoing",campaign_id]);
+    }
+    static getDonationValue(camp_id,username)
+    {
+        return db.execute('select Donation_val from request_donation where campaign_id=? and username=?'
+        ,[camp_id,username]);
     }
     //calculateRating(double);
     //checkEnd();

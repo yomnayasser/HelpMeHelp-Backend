@@ -97,7 +97,7 @@ exports.search=function(req,res){
 exports.join=function(req,res){
     const campid=req.body.campid;
     const username=req.body.username;
-    const userstate=req.body.userstate;
+    const userstate="pending";
     User.joinCampaign(campid,username,userstate)
     .then(()=>{
         res.status(200).json({message:'join done'});
@@ -108,8 +108,8 @@ exports.donate=function(req,res){
     const campid=req.body.campid;
     const username=req.body.username;
     const amount=req.body.amount;
-    const date=req.body.date;
-    User.donate(amount,campid,username,date)
+    const request_donation="pending"
+    User.donate(amount,campid,username,request_donation)
     .then(()=>{
         res.status(200).json({message:'donation done'});
     })
@@ -421,6 +421,28 @@ exports.UserSignUp=function(req,res)
             {
                 u.register().then(res.send(true));
             }
+        })
+        .catch(err=> console.log(err));
+}
+exports.AcceptDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+    const username=req.params.username;
+    campaign.getDonationValue(campaign_id,username).then(([result])=>{
+        campaign.add_donor(campaign_id,username,new Date(),result[0].Donation_val)
+        .then((done)=>{
+            res.send(done);
+        })
+        .catch(err=> console.log(err));
+    })
+}
+exports.RejectDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+    const username=req.params.username;
+    campaign.reject_donor(campaign_id,username)
+        .then((done)=>{
+            res.send(done);
         })
         .catch(err=> console.log(err));
 }

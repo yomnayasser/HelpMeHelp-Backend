@@ -10,7 +10,8 @@ router.post('/join',userCotnroller.join);
 //router.get('/history',userCotnroller.history);
 router.get('/search',userCotnroller.search);
 router.post('/userSignUp',userCotnroller.UserSignUp);
-
+router.get('/user/approveDonationRequests/:id/:username',userCotnroller.AcceptDonationRequests)
+router.get('/user/rejectDonationRequests/:id/:username',userCotnroller.RejectDonationRequests)
 //router.post('/chat',userCotnroller.getOldMessages);
 router.post('/userAddCampaign/:id',userCotnroller.launchDonationCampaign);
 
