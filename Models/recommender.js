@@ -6,15 +6,25 @@ class recommender{
     {
         return db.execute('select embed_user from user_embed where username= ?',[username]);
     }
-    static getAllEmbedCampaigns()
-    {
-        return db.execute('select campaign_embed from campaign_embed');
+    static getAllOngoingCampaignIDS(){
+        return db.execute('select Campaign_ID from campaign where Status="ongoing"');
     }
-    static getCampaignInfo(embedCampaign)
+    static getEmbedCampaigns(campID)
     {
-        db.execute('select camapaign_ID from campaign_embed where camapaign_embed=?',[embedCampaign]).then((campaignID)=>{
-            return Campaign.getCampaginDeitals(campaignID);            
-        })
+        return db.execute('select campaign_embed from campaign_embed where campaign_ID=?',[campID]);
+    }
+    static getCampaignID(embedCampaign)
+    {
+        return db.execute('select campaign_ID from campaign_embed where campaign_embed=?',[embedCampaign])
+        // .then(([campaignID])=>{
+        //     console.log(`camp id: ${campaignID[0].campaign_ID}`)
+            
+        //     Campaign.getCampaginDeitals(campaignID[0].campaign_ID)
+        //     // .then(([camp])=>{
+        //     //     console.log(camp);
+        //     //     return camp;
+        //     // })      
+        // })
     }
     static getAllInteractions()
     {

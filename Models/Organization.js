@@ -205,7 +205,11 @@ class Organization extends account
                 .then(db.execute('select id from organization_Type where type= ?',[this.organizationType]).then(([id])=>{
                     db.execute('insert into has_organization_type values (?,?)',[this.userName,id[0].id]);
                 })).catch(err=> console.log(err))
-                .then(db.execute('insert into hotline values (?,?,?)',[this.hotline[0],this.userName,this.hotline[1]]))
+                .then(()=>{
+                    if(!this.hotline==0)
+                    db.execute('insert into hotline values (?,?,?)',[this.hotline[0],this.userName,this.hotline[1]]);
+                }
+                )
                 .then(()=>{
                     for(let i=0;i<this.socialMedia.length;i++)
                     {
