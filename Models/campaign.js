@@ -4,8 +4,8 @@ var arabicNameToEn = require("arabic-name-to-en")
 const smartSearch = require('smart-search')
 
 class campaign {
-    constructor(name,status,orgUsername,U_username,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink){
-        // this.ID=ID;
+    constructor(ID,name,status,orgUsername,U_username,address,description,process,startDate,endDate,progress,target,image,dontationTypeName,QuizLink){
+        this.ID=ID;
         this.name=name;
         this.status=status;
         this.orgUsername=orgUsername;
@@ -19,7 +19,7 @@ class campaign {
         this.target=target;
         // this.rating=rating;
         this.image=image;
-        this.dontationTypeID=dontationTypeID;
+        this.dontationTypeName=dontationTypeName;
         this.QuizLink=QuizLink;
         // this.LaunchingCampaignStrategy=LaunchingCampaignStrategy;
         // this.campaignFactory=campaignFactory;
@@ -145,6 +145,11 @@ class campaign {
         return db.execute('Select Campaign_ID from `join` where Username=?',[username]);
     }
 
+    static getAllCampaignsUserMade(username)
+    {
+        return db.execute('Select * from campaign where U_username=?',[username]);
+    }
+
     static getAllCampaigns()
     {
         return db.execute('select * from campaign')
@@ -164,8 +169,10 @@ class campaign {
     }
     addVolunteeringOrDonationCampaign()
     {
-        return db.query('insert into campaign(name,address,status,quizlink,description,image,target,startdate,enddate,progress,org_username,u_username,donationtype,process) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-        ,[this.name,this.address,this.status,this.QuizLink,this.description,this.image,this.target,this.startDate,this.endDate,this.progress,this.orgUsername,this.U_username,this.dontationTypeID,this.process]);
+        return this.getCampaignDonationTypeIDfromName(this.dontationTypeName).then(([dontationTypeID])=>{
+            db.query('insert into campaign(name,address,status,quizlink,description,image,target,startdate,enddate,progress,org_username,u_username,donationtype,process) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            ,[this.name,this.address,this.status,this.QuizLink,this.description,this.image,this.target,this.startDate,this.endDate,this.progress,this.orgUsername,this.U_username,dontationTypeID[0].id,this.process]);    
+        })
     }
     static addCampaignToEmbedCampaign(id)
     {

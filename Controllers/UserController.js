@@ -324,7 +324,7 @@ exports.getAllCampagins= function (req,res)
     .then(([campaigns])=>{
         for(let i=0;i<campaigns.length;i++)
         {
-            var camp = new campaign();
+            const camp = new campaign();
             name=campaigns[i].Name;
             status=campaigns[i].Status;
             ID=campaigns[i].Campaign_ID;
@@ -342,15 +342,17 @@ exports.getAllCampagins= function (req,res)
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID; camp.process=process;
-            allCampaigns.push(camp);
-
-            if(i==campaigns.length-1)
-            {
-               console.log(allCampaigns)
-                res.send(allCampaigns);
-            }
-
+            camp.image=image; camp.target=target; camp.ID=ID;camp.process=process;
+            campaign.getDonationTypeNameFromId(dontationTypeID).then(([dontationTypeName])=>{
+                camp.dontationTypeName=dontationTypeName[0].type;
+                allCampaigns.push(camp);
+    
+                if(i==campaigns.length-1)
+                {
+                   console.log(allCampaigns)
+                    res.send(allCampaigns);
+                }
+            })
         }
     })
     .catch(err=> console.log(err))
@@ -407,7 +409,6 @@ exports.updateUserPorfile= function(req,res)
         console.log(updatedUser);
     })
 }
-
 exports.getUserjoinedCampagin= function (req,res)
 {
     const username=req.params.id;
@@ -423,7 +424,7 @@ exports.getUserjoinedCampagin= function (req,res)
         {
             campaign.getAllUserCampaigns(IDS[i].Campaign_ID)
             .then(([campaigns])=>{
-            var camp = new campaign();
+            const camp = new campaign();
             name=campaigns[0].Name;
             status=campaigns[0].Status;
             ID=campaigns[0].Campaign_ID;
@@ -441,23 +442,70 @@ exports.getUserjoinedCampagin= function (req,res)
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-            camp.image=image; camp.target=target; camp.ID=IDS[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+            camp.image=image; camp.target=target; camp.ID=ID;
             camp.process=process;
-            allCampaigns.push(camp);
 
-            if(i==IDS.length-1)
-            {
-               console.log(allCampaigns)
-                res.send(allCampaigns);
-            }
-                
+            campaign.getDonationTypeNameFromId(dontationTypeID).then(([dontationTypeName])=>{
+                camp.dontationTypeName=dontationTypeName[0].type;
+                allCampaigns.push(camp);
+    
+                if(i==IDS.length-1)
+                {
+                   console.log(allCampaigns)
+                    res.send(allCampaigns);
+                }
+            })         
         })
         .catch(err=> console.log(err));
         }
     })
     .catch(err=> console.log(err));
 }
+exports.getAllCampaignsMadeByUser=function(req,res)
+{
+    const username=req.params.id;
+    let ID; let name; let status; let orgUsername; let U_username;
+    let address; let description; let startDate; let endDate;
+    let progress; let target; let image; let dontationTypeID; 
+    let process;
+    var allCampaigns= new Array();
 
+    campaign.getAllCampaignsUserMade(username).then(([campaigns])=>{
+        for(let i=0;i<campaigns.length;i++)
+        {
+        const camp = new campaign();
+        name=campaigns[i].Name;
+        status=campaigns[i].Status;
+        ID=campaigns[i].Campaign_ID;
+        address=campaigns[i].Address;
+        image=campaigns[i].Image;
+        description=campaigns[i].Description;
+        startDate=campaigns[i].StartDate;
+        endDate=campaigns[i].EndDate;
+        progress=campaigns[i].Progress;
+        target=campaigns[i].Target;
+        orgUsername=campaigns[i].Org_username;
+        U_username=campaigns[i].U_username;
+        dontationTypeID=campaigns[i].DonationType;
+        process=campaigns[i].process;
+
+        camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
+        camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
+        camp.image=image; camp.target=target; camp.ID=ID; camp.process=process;
+        campaign.getDonationTypeNameFromId(dontationTypeID).then(([dontationTypeName])=>{
+            camp.dontationTypeName=dontationTypeName[0].type;
+            allCampaigns.push(camp);
+
+            if(i==campaigns.length-1)
+            {
+               console.log(allCampaigns)
+                res.send(allCampaigns);
+            }
+        })
+    }    
+ })
+    .catch(err=> console.log(err));
+}
 exports.checkUserCampaginStatus= function (req,res)
 {
     const ID=req.params.id;
@@ -544,8 +592,6 @@ exports.launchDonationCampaign= async function (req,res)
     let image = req.body.image;
     const dontationTypeName = req.body.DonationType;
 
-    campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
-        const dontationTypeID= id[0].id;
         if(image==null)
         {
             image="Not Found";
@@ -558,7 +604,7 @@ exports.launchDonationCampaign= async function (req,res)
         {
             process="Not Found";
         }
-        const camp=new campaign(name,status,null,Username,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,null);
+        const camp=new campaign(null,name,status,null,Username,address,description,process,startDate,endDate,progress,target,image,dontationTypeName,null);
         camp.addVolunteeringOrDonationCampaign().then(function([result]){
             if(result['insertId'])
             {
@@ -567,5 +613,4 @@ exports.launchDonationCampaign= async function (req,res)
                 }).catch(err=>console.log(err));
             }
         }).catch(err=>console.log(err));
-    })    
 }
