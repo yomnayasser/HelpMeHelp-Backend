@@ -4,6 +4,7 @@ const bodyParser=require('body-parser');
 var LoginRouter = require('./routes/user');
 var AdminRouter = require('./Routes/adminRoutes')
 var OrgLoginRouter = require('./Routes/OrganizationRouter')
+var recommendRouter = require('./Routes/recommendRoutes')
 
 const app=express();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(LoginRouter);
 app.use(AdminRouter);
 app.use(OrgLoginRouter);
+app.use(recommendRouter);
 
 //connect to server
 /*app.listen('8080',function(){
@@ -42,10 +44,28 @@ io.on('connection', (socket) => {
         //if(socket)socket.disconnect();
       //})
 });
+const tf = require('@tensorflow/tfjs');
+const tfn = require('@tensorflow/tfjs-node');
 
-
+const modelPath = "http://localhost:8080/tfjs_campaign_recommender/model.json";
+// const modelPath = "./tfjs_campaign_recommender/model.json";
+let model1;
+const loadModel = async () => {
+  const handler = tfn.io.fileSystem("./tfjs_campaign_recommender/model.json");
+  const model = await tf.loadLayersModel(handler);
+  // model.summary();
+  console.log('model loaded');
+  return model;
+}
 server.listen(port, () => {
   console.log(`Server running on port: ${port}`)
+  tf.ready().then(() => {
+    console.log("tf ready");
+    loadModel().then((model)=>{
+      model1 = model;
+      exports.model1 = model1;
+    })
+  });
     let date_ob = new Date();
     let date = ("0" + date_ob.getDate()).slice(-2);
     let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
