@@ -543,9 +543,9 @@ exports.launchDonationCampaign= async function (req,res)
     const target = req.body.target;
     let image = req.body.image;
     const dontationTypeName = req.body.DonationType;
-
-    campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
-        const dontationTypeID= id[0].id;
+    campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([ids])=>{
+        const dontationTypeID= ids[0].ID;
+        console.log(dontationTypeID)
         if(image==null)
         {
             image="Not Found";
