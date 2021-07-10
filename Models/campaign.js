@@ -165,7 +165,7 @@ class campaign {
     }    
     static getCampaignDonationTypeIDfromName(dontationTypeName)
     {
-        return db.execute('select id from donation_type where Type=?',[dontationTypeName]);
+        return db.execute('select ID from donation_type where Type=?',[dontationTypeName]);
     }
     addVolunteeringOrDonationCampaign()
     {
