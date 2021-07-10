@@ -614,3 +614,24 @@ exports.getAllCampaignsMadeByUser=function(req,res)
  })
     .catch(err=> console.log(err));
 }
+
+exports.getPendingDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+   // const username=req.params.username;
+    
+    var PendingUsers= new Array();
+    campaign.getDonationPendingApplicants(campaign_id).then(([result])=>{
+        for(let i=0;i<result.length;i++)
+        {
+            User.findbyID(result[i].Username).then(([user])=>{
+                PendingUsers.push(user[0]);
+                if(i==result.length-1)
+                {
+                   console.log(PendingUsers)
+                    res.send(PendingUsers);
+                }
+            })
+        }
+    })
+}

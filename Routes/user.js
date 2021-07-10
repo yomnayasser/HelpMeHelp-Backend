@@ -29,4 +29,5 @@ router.get('/userProfile/:id',userCotnroller.UserProfile);
 router.post('/userUpdateProfile/:id',userCotnroller.updateUserPorfile);
 router.get('/userCamaginsJoined/:id',userCotnroller.getUserjoinedCampagin);
 router.get('/userCheckCampaginStatus/:username/:id',userCotnroller.checkUserCampaginStatus);
+router.get('/AllDonationPendings/:id',userCotnroller.getPendingDonationRequests);
 module.exports=router;

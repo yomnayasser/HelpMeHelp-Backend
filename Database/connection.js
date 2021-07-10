@@ -11,14 +11,14 @@ const db=mysql.createConnection({
     //password:'database',
 
     // password:'sarafares1999',
-  password:'admin1989',
-    //database:'helpmehelp',
+  //password:'admin1989',
+    database:'helpmehelp',
    //database:'helpmehelpdb',
     //  password:'database',
     //database:'helpmehelp',
   // database:'helpmehelpdb',
 
-    // password:'database',
+     password:'database',
 
    // password:'database',
 

@@ -196,6 +196,10 @@ class campaign {
     {
         return db.execute('Select * from campaign where U_username=?',[username]);
     }
+    static getDonationPendingApplicants(ID)
+    {
+        return db.execute('Select Username from request_donation where Campaign_ID=? and request_status="Pending"',[ID]);
+    }
 
     //calculateRating(double);
     //checkEnd();
