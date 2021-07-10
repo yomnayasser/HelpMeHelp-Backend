@@ -462,19 +462,19 @@ exports.checkUserCampaginStatus= function (req,res)
 {
     const ID=req.params.id;
     const username=req.params.username;
-    let status;
+    let st;
     User.getUserCampaginStatus(username,ID)
     .then(([status])=>{
         if(status[0]==null)
         {
-            status="null"
+            st="null"
         }
         else
         {
-            status=status[0].Userstate;
+            st=status[0].Userstate;
         }
-         res.send({status})
-       // console.log({status})
+         res.send({st})
+        console.log({st})
     })
     .catch(err=> console.log(err));
 }
