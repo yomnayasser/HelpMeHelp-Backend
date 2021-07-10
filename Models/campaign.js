@@ -1,7 +1,10 @@
 const { decodeBase64 } = require("bcryptjs");
 var db=require('../Database/connection');
 var arabicNameToEn = require("arabic-name-to-en")
-const smartSearch = require('smart-search')
+const smartSearch = require('smart-search');
+const { search } = require("./Organization");
+var nodeq = require("node-q");
+const { pause } = require("../Database/connection");
 
 class campaign {
     constructor(ID,name,status,orgUsername,U_username,address,description,startDate,endDate,progress,target,rating,image,LaunchingCampaignStrategy,dontationTypeID,campaignFactory){
@@ -64,36 +67,77 @@ class campaign {
     {
         
     }
-    static search(startRow,rowCount,text)
+    
+    static search(startRow,rowCount,text,campaigns)
     {
+        //let campaigns=[];
         let promise= db.execute('select * from campaign limit ?,?',
         [startRow,rowCount]);
+        var all_eng_campaigns=[]
         promise.then((rows)=>{
-            let campaigns=rows[0];
-            let all_eng_campaigns=rows[0];
-            //console.log(campaigns);
             //console.log(rows[0]);
-            //console.log(campaigns[2].Name);
-            //console.log(rows[0][2].Name);
-            for(let i=0;i<campaigns.length;i++)
+            for(let i=0;i<rows[0].length;i++)
             {
-                all_eng_campaigns[i].Name=arabicNameToEn(all_eng_campaigns[i].Name);
-                all_eng_campaigns[i].Description=arabicNameToEn(all_eng_campaigns[i].Description);
+                all_eng_campaigns.push({id:rows[0][i].Campaign_ID,name:rows[0][i].Name,desc:rows[0][i].Description});
+            }
+            //console.log(all_eng_campaigns);
+            //var all_eng_campaigns=rows[0];
+            //const temp=all_eng_campaigns;
+            //console.log(all_eng_campaigns);
+            for(let i=0;i<all_eng_campaigns.length;i++)
+            {
+                all_eng_campaigns[i].name=arabicNameToEn(all_eng_campaigns[i].name);
+                all_eng_campaigns[i].desc=arabicNameToEn(all_eng_campaigns[i].desc);
             } 
-            //console.log(campaigns[2].Name);
-            //console.log(rows[0][2].Name);
-            //console.log(all_eng_campaigns[2].Name);
+            //console.log(rows[0]);
             const entries = all_eng_campaigns;
             var patterns = [text];
-            var fields = { Name: true, Description: true };
+            var fields = { name: true, desc: true };
             var results = smartSearch(entries, patterns, fields);
-            console.log(results);
+            //console.log(results);
+            for(let i=0;i<results.length;i++)
+            {
+                for(let j=0;j<rows[0].length;j++)
+                {
+                    //console.log(results[i].entry.id);
 
+                    if(results[i].entry.id==rows[0][j].Campaign_ID)
+                    {
+                        console.log("da5l2");
+                        campaigns.push(rows[0][j]);
+                        //console.log(campaigns);
+                    }
+                }
+            }
+            //console.log(campaigns);
+            //return promise;
+            //this.sleep(10000).then(() => {
+                
+            //});
+            //this.paused();
+            
+            /*for(let i=0;i<results.length;i++)
+            {
+                db.execute('select * from campaign where Campaign_ID=? limit ?,?',[results[i].entry.Campaign_ID,startRow,rowCount])
+                .then(([campaign])=>{
+                    campaigns.push(campaign[0]);
+                    //console.log(campaign[0]);
+                })
+                .catch(err=> console.log(err));
+            }*/
+            
+            //console.log(campaigns[0]);
+            //return campaigns;
+            
         })
         .catch(err=> console.log(err));
         return promise;
     }
+    static sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
+    static async paused() {
 
+        await new Promise(resolve => setTimeout(resolve, 10000));
+    }
     static getPendingApplicants(ID)
     {
         return db.execute('Select Username from `approve` where CampaignID=? and Userstate="Pending"',[ID]);

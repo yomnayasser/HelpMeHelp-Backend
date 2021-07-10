@@ -8,7 +8,7 @@ router.post('/donate',userCotnroller.donate);
 router.post('/join',userCotnroller.join);
 //router.post('/approve',userCotnroller.approve);
 //router.get('/history',userCotnroller.history);
-router.get('/search',userCotnroller.search);
+router.get('/search/:startRow/:rowCount/:text',userCotnroller.search);
 router.post('/userSignUp',userCotnroller.UserSignUp);
 /////////chat///////////
 router.get('/oldChat/:username/:other_username',userCotnroller.getOldMessages);

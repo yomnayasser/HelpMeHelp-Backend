@@ -70,11 +70,19 @@ exports.getAllChats=function(req,res){
     }
 }
 exports.getOldMessages=function(req,res){
-    const username=req.params.username;
-    const other_username=req.params.other_username;
+    let username=req.params.username;
+    let other_username=req.params.other_username;
+    console.log(username);
+    console.log(other_username);
     let chatType="";
     let chatID=0;
-    if(other_username.substring(0,4)=="Org_")
+    if(username.substring(0,4)=="Org_"){
+        other_username=req.params.username;
+        username=req.params.other_username;
+    }
+    console.log(username);
+    console.log(other_username);
+    if(other_username.substring(0,4)=="Org_" ||username.substring(0,4)=="Org_")
     {chatType="OU";}
     else{chatType="UU";}
     chat.add_chat(username,other_username,chatType)
@@ -140,18 +148,39 @@ exports.saveMessage=function(req,res){
     .catch(err=>console.log(err));
 }*/
 exports.search=function(req,res){
-    const startRow=req.body.startRow;
-    const rowCount=req.body.rowCount;
-    const arabic_text=req.body.text;
+    const startRow=req.params.startRow;
+    const rowCount=req.params.rowCount;
+    const arabic_text=req.params.text;
     const text=arabicNameToEn(arabic_text);
-    console.log(text);
+    //console.log(text);
     //hotline.search(startRow,rowCount,text)
     //org.search(startRow,rowCount,text);
-    campaign.search(startRow,rowCount,text)
-    .then(()=>{
-        res.status(200).json({message:'search done'});       
+    let searched_campaigns=[];
+    //searched_campaigns=campaign.search(startRow,rowCount,text);
+    /*.then((campaigns)=>{
+        console.log(campaigns);
+        //console.log(campaigns);
+        res.status(200).json({message:'search done'});
     })
     .catch(err=>console.log(err));
+    //console.log(c);
+    if(searched_campaigns!=null)
+    {
+        //console.log(searched_campaigns);
+       
+        res.status(200).json({message:'search done'});
+        console.log("5alast");
+    }*/
+    //let searched_campaigns=null;
+    //searched_campaigns=campaign.search(startRow,rowCount,text);
+    //console.log(searched_campaigns);
+    campaign.search(startRow,rowCount,text,searched_campaigns).then(()=>{
+        console.log(searched_campaigns);
+        //res.status(200).json({message:'search done'});
+        res.send(searched_campaigns);
+        
+    })
+    //res.status(200).json({message:'search done'});
 }
 /*exports.history=function(req,res){
     const username=req.body.username;
