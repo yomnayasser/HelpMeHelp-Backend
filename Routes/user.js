@@ -14,7 +14,7 @@ router.get('/user/approveDonationRequests/:id/:username',userCotnroller.AcceptDo
 router.get('/user/rejectDonationRequests/:id/:username',userCotnroller.RejectDonationRequests)
 //router.post('/chat',userCotnroller.getOldMessages);
 router.post('/userAddCampaign/:id',userCotnroller.launchDonationCampaign);
-
+router.get('/CampaginsMadeByUser/:id',userCotnroller.getAllCampaignsMadeByUser);
 /////////chat///////////
 router.get('/oldChat/:username/:other_username',userCotnroller.getOldMessages);
 router.get('/getChatID/:sender/:reciever/:chatType',userCotnroller.getChatID);

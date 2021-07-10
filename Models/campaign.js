@@ -160,7 +160,7 @@ class campaign {
     }    
     static getCampaignDonationTypeIDfromName(dontationTypeName)
     {
-        return db.execute('select id from donation_type where Type=?',[dontationTypeName]);
+        return db.execute('select ID from donation_type where Type=?',[dontationTypeName]);
     }
     addVolunteeringOrDonationCampaign()
     {
@@ -192,6 +192,11 @@ class campaign {
         return db.execute('select Donation_val from request_donation where campaign_id=? and username=?'
         ,[camp_id,username]);
     }
+    static getAllCampaignsUserMade(username)
+    {
+        return db.execute('Select * from campaign where U_username=?',[username]);
+    }
+
     //calculateRating(double);
     //checkEnd();
     //excuteLaunchingStrategy();

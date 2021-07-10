@@ -5,10 +5,10 @@ const db=mysql.createConnection({
     user:'root',
 
 
-    //password:'sarafares1999',
+     //password:'sarafares1999',
     //database:'helpmehelp',
-   database:'helpmehelp',
-     //password:'database',
+    //database:'helpmehelp',
+    //password:'database',
 
     // password:'sarafares1999',
   password:'admin1989',
@@ -18,9 +18,9 @@ const db=mysql.createConnection({
     //database:'helpmehelp',
   // database:'helpmehelpdb',
 
-     //password:'database',
-
     // password:'database',
+
+   // password:'database',
 
     // password:'project123',
     namedPlaceholders:true
