@@ -76,12 +76,26 @@ class User extends account
     static donate(Donation_val,campaign_id,username,RequestStatus)
     {
         return db.execute('INSERT INTO request_donation VALUES (?, ?, ?, ?)',
-        [campaign_id,username,Donation_val,RequestStatus]);
+        [campaign_id,username,Donation_val,RequestStatus]).then(()=>{
+            db.execute('select embed_user from user_embed where username=?',[username]).then(([u_embed])=>{
+                db.execute('select campaign_embed from campaign_embed where campaign_id=?',[campaign_id]).then(([camp_embed])=>{
+                    db.execute('insert into interactions values(? ,? ,? ,?)'
+                    ,[u_embed[0].embed_user,camp_embed[0].campaign_embed,new Date(),2]);
+                })
+            })
+        })
     }
     static joinCampaign(campaign_id,username,userstate)
     {
         return db.execute('INSERT INTO `approve` VALUES (?, ?, ?)',
-        [campaign_id,username,userstate]);
+        [campaign_id,username,userstate]).then(()=>{
+            db.execute('select embed_user from user_embed where username=?',[username]).then(([u_embed])=>{
+                db.execute('select campaign_embed from campaign_embed where campaign_id=?',[campaign_id]).then(([camp_embed])=>{
+                    db.execute('insert into interactions values(? ,? ,? ,?)'
+                    ,[u_embed[0].embed_user,camp_embed[0].campaign_embed,new Date(),2]);
+                })
+            })
+        })
     }
     // static approveDonorRequest(campaign_id,username,Donation_val)
     // {
