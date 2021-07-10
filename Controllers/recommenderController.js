@@ -16,21 +16,21 @@ const loadModel = async () => {
     return model;
 }
 const getUserRecs = async (model, embed_id, campaigns)=>{
-    
-    
     // console.log(campaigns);
+    let num = Math.floor(campaigns.length*0.2)
     await tf.ready();
     // .then(() => {
         const tf_cids = tf.tensor1d(campaigns);
         let tf_uid = tf.tensor1d(embed_id);
         const predRes = model.predict([tf_cids, tf_uid]);
-        res = predRes.reshape([-1]);
-        // console.log(res.shape);
+        // console.log(predRes.shape);
         
-        const {values, indices} = tf.topk(res, k=1);
+        res = predRes.reshape([-1]);
+        
+        const {values, indices} = tf.topk(res, k=num);
         
         let indx = indices.dataSync();
-        console.log(indx);
+        // console.log(indx);
         return indx;
     // });
 }
@@ -60,6 +60,7 @@ exports.getRecommendedVolunteerCampaigns= async function(req,res){
     //     // return userRecDict[embed_id];
     //     res.status(200).json(userRecDict[embed_id]);
     // }
+    console.log('recommending volunteer campaigns for user: '+req.params.id);
     const model = index.model1;
     let embed_id;
     await recommender.getEmbedUser(req.params.id).then(([id])=>embed_id=id[0].embed_user);
@@ -71,16 +72,16 @@ exports.getRecommendedVolunteerCampaigns= async function(req,res){
         await recommender.getEmbedCampaigns(campaignIDs[i].Campaign_ID).then(([campaign_embed])=>{
             embed= campaign_embed[0].campaign_embed;
         })
-        console.log(embed);
         c_arr.push(embed)
     }
+    // console.log(c_arr.length);
     // console.log(campaigns);
     // let c_arr = (()=>{u=[]; for(let i = 0; i < campaigns.length; i++)u.push(campaigns[i].campaign_embed); return u;})();
     let u_arr = (()=>{u=[]; for(let i = 0; i < c_arr.length; i++)u.push(embed_id); return u;})();
     let indx = await getUserRecs(model, u_arr, c_arr);
     let campRes = [];
     for(let i=0; i<indx.length; i++){
-        console.log(`indx: ${i}, camp embed: ${c_arr[i]}`);
+        // console.log(`indx: ${i}, camp embed: ${c_arr[i]}`);
         let cid;
         await recommender.getCampaignID(c_arr[i])
         .then(([campaignID])=>{
@@ -95,7 +96,7 @@ exports.getRecommendedVolunteerCampaigns= async function(req,res){
     userRecDict[embed_id] = campRes;
     console.log(`res: ${campRes}`);
     campRes.filter((campaign)=>campaign.DonationType==1);
-    res.status(200).json({campRes});
+    res.status(200).json(campRes);
 }
 exports.getRecommendedDonationCampaigns=async function(req,res){
     // if(embed_id in userRecDict){
@@ -113,7 +114,7 @@ exports.getRecommendedDonationCampaigns=async function(req,res){
         await recommender.getEmbedCampaigns(campaignIDs[i].Campaign_ID).then(([campaign_embed])=>{
             embed= campaign_embed[0].campaign_embed;
         })
-        console.log(embed);
+        // console.log(embed);
         c_arr.push(embed)
     }
     // console.log(campaigns);
@@ -122,7 +123,7 @@ exports.getRecommendedDonationCampaigns=async function(req,res){
     let indx = await getUserRecs(model, u_arr, c_arr);
     let campRes = [];
     for(let i=0; i<indx.length; i++){
-        console.log(`indx: ${i}, camp embed: ${c_arr[i]}`);
+        // console.log(`indx: ${i}, camp embed: ${c_arr[i]}`);
         let cid;
         await recommender.getCampaignID(c_arr[i])
         .then(([campaignID])=>{
@@ -136,7 +137,7 @@ exports.getRecommendedDonationCampaigns=async function(req,res){
     }
     userRecDict[embed_id] = campRes;
     let r = campRes.filter((campaign)=>campaign.DonationType!=1);
-    console.log(`res: ${r}`);
+    // console.log(`res: ${r}`);
     
     res.status(200).json({r});
 }

@@ -8,8 +8,9 @@ const Organization=require('../Models/Organization');
 const Campaign=require('../Models/campaign');
 const User=require('../Models/User');
 const { getMaxListeners } = require('../Database/connection');
+var db=require('../Database/connection');
 
-exports.OrgSignUp=function(req,res)
+OrgSignUp=function(req,res)
 {
     const name=req.body.name;
     const userName=req.body.userName;
@@ -176,3 +177,153 @@ exports.readAndSaveOrganizations = async function(req,res){
           });
     
 }
+
+launchVolunteerOrDonationCampaign= async function (req,res)
+{
+    const orgUsername= req.params.id;
+    const name = req.body.name;
+    const status = "upcoming"
+    const address = req.body.address;
+    const description = req.body.description;
+    let process=req.body.process;
+    const startDate = req.body.StartDate;
+    let endDate = req.body.EndDate;
+    const progress = 0;
+    const target = req.body.target;
+    let image = req.body.image;
+    const dontationTypeName = req.body.DonationType;
+    let QuizLink=req.body.QuizLink;
+
+    Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
+        const dontationTypeID= id[0].id;
+        if(QuizLink==null)
+        {
+            QuizLink="Not Found";
+        }
+        if(image==null)
+        {
+            image="Not Found";
+        }
+        // if(endDate==null)
+        // {
+        //     endDate="Not Found";
+        // }
+        if(process==null)
+        {
+            process="Not Found";
+        }
+        const camp=new Campaign(name,status,orgUsername,null,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink);
+        camp.addVolunteeringOrDonationCampaign().then(function([result]){
+            if(result['insertId'])
+            {
+                Campaign.addCampaignToEmbedCampaign(result['insertId']).then(()=>{
+                    res.send('Done');
+                }).catch(err=>console.log(err));
+            }
+        }).catch(err=>console.log(err));
+    }) 
+} 
+
+exports.readInsertCamp = async function (req,res)
+{
+    fs.createReadStream('./Dataset/campaigns.csv')
+        .pipe(csv())
+        .on('data', async (row) => {
+            let embed = row['Embed_ID'];
+            if(embed<200 || embed>500)return;
+            let name = row['Name'];
+            let status = row['Status'];
+            let address = 'egypt';
+            let description = row['Description'];
+            let process=req.body.process;
+            let startDate = new Date(row['StartDate']);
+            let endDate = new Date(row['EndDate']);
+            const progress = 0;
+            const target = 100;
+            let image = null;
+            let dontationTypeName = row['DonationType'];
+            let QuizLink=null;
+            //select Username from helpmehelp.organization where name="resala";
+            let orgUsername= await (db.execute('select Username from helpmehelp.organization where name=?',[row['Name']]));
+            await Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(async ([id])=>{
+                const dontationTypeID= id[0].id;
+                if(QuizLink==null)
+                {
+                    QuizLink="Not Found";
+                }
+                if(image==null)
+                {
+                    image="Not Found";
+                }
+                // if(endDate==null)
+                // {
+                    //     endDate="Not Found";
+                    // }
+                    if(process==null)
+                    {
+                        process="Not Found";
+                    }
+                    const camp=new Campaign(name,status,orgUsername[0].Username,null,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink);
+                    await camp.addVolunteeringOrDonationCampaign().then(async function([result]){
+                        if(result['insertId'])
+                        {
+                            await (db.execute('insert into campaign_embed values(?,?)',[result['insertId'],embed]));
+                            // Campaign.addCampaignToEmbedCampaign(result['insertId']).then(()=>{
+                            //     res.send('Done');
+                            // }).catch(err=>console.log(err));
+                        }
+                    }).catch(err=>console.log(err));
+                })
+            })
+            .on('end', async() => {
+              console.log('orgsallinfo CSV file successfully processed');
+            //   console.log('done');
+            res.send(true);
+              }).on('error', function(err) {
+                console.log(err);
+              });
+}
+            
+exports.readInsertUser=function(req,res)
+{
+    fs.createReadStream('./Dataset/users.csv')
+    .pipe(csv())
+    .on('data', async (row) => {
+        
+    let name=row['Name'];
+    let embed = row['EmbedID'];
+    if(embed>200||embed<6)return;
+    let userName=row['Username']+(embed+1);
+    let password=row['Password'];
+    let country="Egypt";
+    let Governorate="Cairo";
+    let email=row['BirthDate'];
+    let age=row['Age'];
+    let address="Cairo";
+    let birthdate=new Date(row['BirthDate']);
+    let role="user";
+    let image='';
+
+    let encryptedPassword=cryptr.encrypt(password);
+    let u=new User(name,userName,encryptedPassword,country,Governorate,email,age,address,birthdate,role,image);
+       await User.findbyID(userName).then(async ([found])=>{
+            if(found[0])
+            {
+                return;
+            }
+            else
+            {
+                await u.register();
+            }
+        })
+        .catch(err=> console.log(err));
+    })
+    .on('end', async() => {
+      console.log('orgsallinfo CSV file successfully processed');
+    //   console.log('done');
+    res.send(true);
+      }).on('error', function(err) {
+        console.log(err);
+      });
+}   
+  
