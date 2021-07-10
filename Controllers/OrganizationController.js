@@ -427,9 +427,10 @@ exports.launchVolunteerOrDonationCampaign= async function (req,res)
     let image = req.body.image;
     const dontationTypeName = req.body.DonationType;
     let QuizLink=req.body.QuizLink;
+    console.log(orgUsername)
 
-    Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
-        const dontationTypeID= id[0].id;
+    Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([ids])=>{
+        const dontationTypeID= ids[0].ID;
         if(QuizLink==null)
         {
             QuizLink="Not Found";
