@@ -5,24 +5,24 @@ const db=mysql.createConnection({
     user:'root',
 
 
-    //password:'sarafares1999',
+     //password:'sarafares1999',
     //database:'helpmehelp',
+    //database:'helpmehelp',
+    //password:'database',
+
+   //password:'sarafares1999',
+
+   //database:'helpmehelp',
+  //database:'helpmehelpdb',
    database:'helpmehelp',
-     //password:'database',
+ // database:'helpmehelpdb',
 
-    password:'sarafares1999',
+    password:'database',
 
-    //database:'helpmehelp',
-   //database:'helpmehelpdb',
-    database:'helpmehelp',
-  // database:'helpmehelpdb',
+   // password:'database',
 
-     password:'database',
-
-    // password:'database',
-
-    //password:'project123',
-    namedPlaceholders:true
+   //password:'project123',
+   namedPlaceholders:true
 });
 
 //connect to db
