@@ -117,7 +117,7 @@ exports.getRecommendedDonationCampaigns=async function(req,res){
         // console.log(embed);
         c_arr.push(embed)
     }
-    // console.log(campaigns);
+     console.log(c_arr);
     // let c_arr = (()=>{u=[]; for(let i = 0; i < campaigns.length; i++)u.push(campaigns[i].campaign_embed); return u;})();
     let u_arr = (()=>{u=[]; for(let i = 0; i < c_arr.length; i++)u.push(embed_id); return u;})();
     let indx = await getUserRecs(model, u_arr, c_arr);
@@ -139,5 +139,5 @@ exports.getRecommendedDonationCampaigns=async function(req,res){
     let r = campRes.filter((campaign)=>campaign.DonationType!=1);
     // console.log(`res: ${r}`);
     
-    res.status(200).json({r});
+    res.status(200).json(r);
 }
