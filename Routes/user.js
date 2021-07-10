@@ -23,8 +23,7 @@ router.post('/saveMessage',userCotnroller.saveMessage);
 router.get('/allchats/:username',userCotnroller.getAllChats);
 router.get('/userCountry/:id',userCotnroller.getCountryFromID);
 router.get('/userGov/:id',userCotnroller.getGovFromID);
-router.get('/userCampagins/:id',userCotnroller.getUserCampaginContributions);
-router.get('/CampaginsMadeByUser/:id',userCotnroller.getAllCampaignsMadeByUser);
+router.get('/userCampagins/:id',userCotnroller.getUserCampaginContributions)
 router.get('/userAllCampagin',userCotnroller.getAllCampagins);
 router.get('/userProfile/:id',userCotnroller.UserProfile);
 router.post('/userUpdateProfile/:id',userCotnroller.updateUserPorfile);

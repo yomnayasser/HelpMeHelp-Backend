@@ -271,17 +271,14 @@ exports.getOrgCampaigns=function(req,res)
 
                 camp.name=name; camp.status=status;camp.orgUsername=username; camp.startDate=startDate;
                 camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-                camp.image=image;camp.process=process; camp.target=target; camp.ID=ID[i].Campaign_ID; 
-                Campaign.getDonationTypeNameFromId(dontationTypeID).then(([id])=>{
-                    camp.dontationTypeName=id[0].type;
-                    campaginsDeitals.push(camp); 
-                    //console.log(campaginsDeitals.length)
-                    if(i==ID.length-1)
-                    {
-                       console.log(campaginsDeitals)
-                        res.send(campaginsDeitals);
-                    }
-                })
+                camp.image=image;camp.process=process; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+                campaginsDeitals.push(camp); 
+                //console.log(campaginsDeitals.length)
+                if(i==ID.length-1)
+                {
+                   console.log(campaginsDeitals)
+                    res.send(campaginsDeitals);
+                }
             })
             .catch(err=> console.log(err))        
         }
@@ -431,6 +428,8 @@ exports.launchVolunteerOrDonationCampaign= async function (req,res)
     const dontationTypeName = req.body.DonationType;
     let QuizLink=req.body.QuizLink;
 
+    Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([id])=>{
+        const dontationTypeID= id[0].id;
         if(QuizLink==null)
         {
             QuizLink="Not Found";
@@ -447,7 +446,7 @@ exports.launchVolunteerOrDonationCampaign= async function (req,res)
         {
             process="Not Found";
         }
-        const camp=new Campaign(name,status,orgUsername,null,address,description,process,startDate,endDate,progress,target,image,dontationTypeName,QuizLink);
+        const camp=new Campaign(name,status,orgUsername,null,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink);
         camp.addVolunteeringOrDonationCampaign().then(function([result]){
             if(result['insertId'])
             {
@@ -456,6 +455,7 @@ exports.launchVolunteerOrDonationCampaign= async function (req,res)
                 }).catch(err=>console.log(err));
             }
         }).catch(err=>console.log(err));
+    }) 
 }   
 
 exports.getOrgStatus =function(req,res)
