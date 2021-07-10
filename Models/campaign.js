@@ -7,27 +7,34 @@ var nodeq = require("node-q");
 const { pause } = require("../Database/connection");
 
 class campaign {
-    constructor(ID,name,status,orgUsername,U_username,address,description,startDate,endDate,progress,target,rating,image,LaunchingCampaignStrategy,dontationTypeID,campaignFactory){
-        this.ID=ID;
+    constructor(name,status,orgUsername,U_username,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink){
+        // this.ID=ID;
         this.name=name;
         this.status=status;
         this.orgUsername=orgUsername;
         this.U_username=U_username;
         this.address=address;
         this.description=description;
+        this.process=process;
         this.startDate=startDate;
         this.endDate=endDate;
         this.progress=progress;
         this.target=target;
-        this.rating=rating;
+        // this.rating=rating;
         this.image=image;
         this.dontationTypeID=dontationTypeID;
-        this.LaunchingCampaignStrategy=LaunchingCampaignStrategy;
-        this.campaignFactory=campaignFactory;
+        this.QuizLink=QuizLink;
+        // this.LaunchingCampaignStrategy=LaunchingCampaignStrategy;
+        // this.campaignFactory=campaignFactory;
     }
     static getCampaginDeitals(campaign_id)
     {
         return db.execute('select * from campaign where Campaign_ID=?',
+        [campaign_id]);
+    }
+    static getDonationType(campaign_id)
+    {
+        return db.execute('select DonationType from campaign where Campaign_ID=?',
         [campaign_id]);
     }
     static get_targetandprogress(campaign_id)
@@ -45,7 +52,7 @@ class campaign {
         return db.execute('update campaign set Progress=? where Campaign_ID =?',
         [new_progress,campaign_id]);
     }
-    static add_volunteer(campaign_id)
+    static add_volunteer(campaign_id,username,date)
     {
         let promise=this.get_targetandprogress(campaign_id);
         promise.then(([rows])=>{
@@ -58,14 +65,48 @@ class campaign {
                 this.change_status_to_complete(campaign_id);
             }
             this.update_progress(new_progress,campaign_id);
-
+            return db.execute('INSERT INTO `join`(Campaign_ID,Username,Date_join) VALUES (?, ?, ?)',
+            [campaign_id,username,date]).then(()=>{
+                db.execute('update `approve` Set userstate=? where campaignid=? and username= ?'
+                ,["accepted",campaign_id,username]);
+            })
         })
         .catch(err=> console.log(err));
         return promise;
     }
-    static add_donation_campaign()
+    static reject_volunteer(campaign_id,username)
     {
-        
+        return db.execute('update `approve` Set userstate=? where campaignid=? and username= ?'
+        ,["Rejeted",campaign_id,username]);
+    }
+    static reject_donor(campaign_id,username)
+    {
+        return db.execute('update request_donation Set request_status=? where campaign_id=? and username= ?'
+        ,["Rejeted",campaign_id,username]);
+    }
+    static add_donor(campaign_id,username,date,Donation_val)
+    {
+        let promise=this.get_targetandprogress(campaign_id);
+         promise.then(([rows])=>{
+            let row=rows[0];
+            let target=parseFloat(row.Target);
+            let Progress=parseFloat(row.Progress);
+            let new_progress=Progress+Donation_val;
+            if(new_progress==target)
+            {
+                campaign.change_status_to_complete(campaign_id);
+            }       
+            campaign.update_progress(new_progress,campaign_id);
+            //console.log(date);
+            console.log(campaign_id,"+",username,"+",Donation_val,"+",date)
+            return db.execute('INSERT INTO `join` VALUES (?, ?, ?, ?)',
+            [campaign_id,username,Donation_val,date]).then(()=>{
+                db.execute('update request_donation Set Request_status=? where campaign_id=? and username= ?'
+                ,["accepted",campaign_id,username]);
+            })
+    })
+    .catch(err=> console.log(err));
+    return promise;
     }
     
     static search(startRow,rowCount,text,campaigns)
@@ -157,7 +198,52 @@ class campaign {
     {
         return db.execute('Select * from campaign where Campaign_ID=?',[ID]);
     }
-
+    static getDonationTypeNameFromId(dontationTypeID)
+    {
+        return db.execute('select type from donation_type where ID=?',[dontationTypeID]);
+    }    
+    static getCampaignDonationTypeIDfromName(dontationTypeName)
+    {
+        return db.execute('select ID from donation_type where Type=?',[dontationTypeName]);
+    }
+    addVolunteeringOrDonationCampaign()
+    {
+        return db.query('insert into campaign(name,address,status,quizlink,description,image,target,startdate,enddate,progress,org_username,u_username,donationtype,process) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        ,[this.name,this.address,this.status,this.QuizLink,this.description,this.image,this.target,this.startDate,this.endDate,this.progress,this.orgUsername,this.U_username,this.dontationTypeID,this.process]);
+    }
+    static addCampaignToEmbedCampaign(id)
+    {
+        return db.execute('SELECT MAX(campaign_embed) as maxid FROM campaign_embed').then(([maxid])=>{
+            if(maxid[0]==null)
+            {
+                return db.execute('insert into campaign_embed values(?,?)',[id,1]);  
+            }
+            else{
+                return db.execute('insert into campaign_embed values(?,?)',[id,(maxid[0].maxid+1)]);
+            }
+        })
+    }
+    static updateFinishedCampaignsStatus(campaign_id)
+    {
+        return db.execute('update campaign set status=? where campaign_id=?',["finished",campaign_id]);
+    }
+    static updateToOngoingCampaignsStatus(campaign_id)
+    {
+        return db.execute('update campaign set status=? where campaign_id=?',["ongoing",campaign_id]);
+    }
+    static getDonationValue(camp_id,username)
+    {
+        return db.execute('select Donation_val from request_donation where campaign_id=? and username=?'
+        ,[camp_id,username]);
+    }
+    static getAllCampaignsUserMade(username)
+    {
+        return db.execute('Select * from campaign where U_username=?',[username]);
+    }
+    static getDonationPendingApplicants(ID)
+    {
+        return db.execute('Select Username from request_donation where Campaign_ID=? and request_status="Pending"',[ID]);
+    }
 
     //calculateRating(double);
     //checkEnd();

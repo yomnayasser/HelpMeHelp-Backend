@@ -204,7 +204,7 @@ exports.search=function(req,res){
 exports.join=function(req,res){
     const campid=req.body.campid;
     const username=req.body.username;
-    const userstate=req.body.userstate;
+    const userstate="pending";
     User.joinCampaign(campid,username,userstate)
     .then(()=>{
         res.status(200).json({message:'join done'});
@@ -215,8 +215,8 @@ exports.donate=function(req,res){
     const campid=req.body.campid;
     const username=req.body.username;
     const amount=req.body.amount;
-    const date=req.body.date;
-    User.donate(amount,campid,username,date)
+    const request_donation="pending"
+    User.donate(amount,campid,username,request_donation)
     .then(()=>{
         res.status(200).json({message:'donation done'});
     })
@@ -346,7 +346,8 @@ exports.getAllCampagins= function (req,res)
 {
     let ID; let name; let status; let orgUsername; let U_username;
     let address; let description; let startDate; let endDate;
-    let progress; let target; let rating; let image; let dontationTypeID; 
+    let progress; let target; let rating; let image; let dontationTypeID;
+    let process; 
     var allCampaigns= new Array();
     campaign.getAllCampaigns()
     .then(([campaigns])=>{
@@ -365,11 +366,12 @@ exports.getAllCampagins= function (req,res)
             target=campaigns[i].Target;
             orgUsername=campaigns[i].Org_username;
             U_username=campaigns[i].U_username;
+            process=campaigns[i].process;
             dontationTypeID=campaigns[i].DonationType;
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID;
+            camp.image=image; camp.target=target; camp.ID=ID; camp.dontationTypeID=dontationTypeID; camp.process=process;
             allCampaigns.push(camp);
 
             if(i==campaigns.length-1)
@@ -441,6 +443,7 @@ exports.getUserjoinedCampagin= function (req,res)
     let ID; let name; let status; let orgUsername; let U_username;
     let address; let description; let startDate; let endDate;
     let progress; let target; let rating; let image; let dontationTypeID; 
+    let process;
     var allCampaigns= new Array();
     campaign.getUserCampaignsIDS(username)
     .then(([IDS])=>{
@@ -463,10 +466,12 @@ exports.getUserjoinedCampagin= function (req,res)
             orgUsername=campaigns[0].Org_username;
             U_username=campaigns[0].U_username;
             dontationTypeID=campaigns[0].DonationType;
+            process=campaigns[0].process;
 
             camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
             camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
             camp.image=image; camp.target=target; camp.ID=IDS[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+            camp.process=process;
             allCampaigns.push(camp);
 
             if(i==IDS.length-1)
@@ -486,19 +491,19 @@ exports.checkUserCampaginStatus= function (req,res)
 {
     const ID=req.params.id;
     const username=req.params.username;
-    let status;
+    let st;
     User.getUserCampaginStatus(username,ID)
     .then(([status])=>{
         if(status[0]==null)
         {
-            status="null"
+            st="null"
         }
         else
         {
-            status=status[0].Userstate;
+            st=status[0].Userstate;
         }
-         res.send({status})
-       // console.log({status})
+         res.send({st})
+        console.log({st})
     })
     .catch(err=> console.log(err));
 }
@@ -530,4 +535,132 @@ exports.UserSignUp=function(req,res)
             }
         })
         .catch(err=> console.log(err));
+}
+exports.AcceptDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+    const username=req.params.username;
+    campaign.getDonationValue(campaign_id,username).then(([result])=>{
+        campaign.add_donor(campaign_id,username,new Date(),result[0].Donation_val)
+        .then((done)=>{
+            res.send(done);
+        })
+        .catch(err=> console.log(err));
+    })
+}
+exports.RejectDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+    const username=req.params.username;
+    campaign.reject_donor(campaign_id,username)
+        .then((done)=>{
+            res.send(done);
+        })
+        .catch(err=> console.log(err));
+}
+exports.launchDonationCampaign= async function (req,res)
+{
+    const Username= req.params.id;
+    const name = req.body.name;
+    const status = "upcoming"
+    const address = req.body.address;
+    const description = req.body.description;
+    let process=req.body.process;
+    const startDate = req.body.StartDate;
+    let endDate = req.body.EndDate;
+    const progress = 0;
+    const target = req.body.target;
+    let image = req.body.image;
+    const dontationTypeName = req.body.DonationType;
+    campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([ids])=>{
+        const dontationTypeID= ids[0].ID;
+        console.log(dontationTypeID)
+        if(image==null)
+        {
+            image="Not Found";
+        }
+        // if(endDate==null)
+        // {
+        //     endDate="Not Found";
+        // }
+        if(process==null)
+        {
+            process="Not Found";
+        }
+        const camp=new campaign(name,status,null,Username,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,null);
+        camp.addVolunteeringOrDonationCampaign().then(function([result]){
+            if(result['insertId'])
+            {
+                campaign.addCampaignToEmbedCampaign(result['insertId']).then(()=>{
+                    res.send('Done');
+                }).catch(err=>console.log(err));
+            }
+        }).catch(err=>console.log(err));
+    })    
+}
+exports.getAllCampaignsMadeByUser=function(req,res)
+{
+    const username=req.params.id;
+    let ID; let name; let status; let orgUsername; let U_username;
+    let address; let description; let startDate; let endDate;
+    let progress; let target; let image; let dontationTypeID; 
+    let process;
+    var allCampaigns= new Array();
+
+    campaign.getAllCampaignsUserMade(username).then(([campaigns])=>{
+        for(let i=0;i<campaigns.length;i++)
+        {
+        const camp = new campaign();
+        name=campaigns[i].Name;
+        status=campaigns[i].Status;
+        ID=campaigns[i].Campaign_ID;
+        address=campaigns[i].Address;
+        image=campaigns[i].Image;
+        description=campaigns[i].Description;
+        startDate=campaigns[i].StartDate;
+        endDate=campaigns[i].EndDate;
+        progress=campaigns[i].Progress;
+        target=campaigns[i].Target;
+        orgUsername=campaigns[i].Org_username;
+        U_username=campaigns[i].U_username;
+        dontationTypeID=campaigns[i].DonationType;
+        process=campaigns[i].process;
+
+        camp.name=name; camp.status=status;camp.orgUsername=orgUsername; camp.U_username=U_username; camp.startDate=startDate;
+        camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
+        camp.image=image; camp.target=target; camp.ID=ID; camp.process=process;
+        campaign.getDonationTypeNameFromId(dontationTypeID).then(([dontationTypeName])=>{
+            camp.dontationTypeName=dontationTypeName[0].type;
+            allCampaigns.push(camp);
+
+            if(i==campaigns.length-1)
+            {
+               console.log(allCampaigns)
+                res.send(allCampaigns);
+            }
+        })
+    }    
+ })
+    .catch(err=> console.log(err));
+}
+
+exports.getPendingDonationRequests=function(req,res)
+{
+    const campaign_id=req.params.id;
+   // const username=req.params.username;
+    
+    var PendingUsers= new Array();
+    campaign.getDonationPendingApplicants(campaign_id).then(([result])=>{
+        for(let i=0;i<result.length;i++)
+        {
+            User.findbyID(result[i].Username).then(([user])=>{
+                PendingUsers.push(user[0]);
+                if(i==result.length-1)
+                {
+                   console.log(PendingUsers)
+                    res.send(PendingUsers);
+                }
+            })
+        }
+    })
 }

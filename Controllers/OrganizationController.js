@@ -241,6 +241,7 @@ exports.getOrgCampaigns=function(req,res)
     const username=req.params.id;
     let name; let status; let dontationTypeID; let address;let image; let campID;
     let description; let startDate; let endDate; let progress;let target; let id;
+    let process;
     var campaginsDeitals = new Array();
 
      
@@ -265,11 +266,12 @@ exports.getOrgCampaigns=function(req,res)
                 endDate=campaign[0].EndDate;
                 progress=campaign[0].Progress;
                 target=campaign[0].Target;
+                process=campaign[0].process;
                 dontationTypeID=campaign[0].DonationType;
 
                 camp.name=name; camp.status=status;camp.orgUsername=username; camp.startDate=startDate;
                 camp.endDate=endDate; camp.description=description; camp.progress=progress; camp.address=address;
-                camp.image=image; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
+                camp.image=image;camp.process=process; camp.target=target; camp.ID=ID[i].Campaign_ID; camp.dontationTypeID=dontationTypeID;
                 campaginsDeitals.push(camp); 
                 //console.log(campaginsDeitals.length)
                 if(i==ID.length-1)
@@ -309,6 +311,7 @@ exports.OrgSignUp=function(req,res)
     const location=req.body.location; 
     const phoneNumber=req.body.phoneNumber;
     const encryptedPassword=cryptr.encrypt(password);
+
     const org=new Organization(name,userName,encryptedPassword,country,Governorate,email,category,subCategory,
         organizationType,description,purpose,rating,website,socialMedia,hotline,logo,requestStatus,phoneNumber,location);
         Organization.getOrg(userName).then(([found])=>{
@@ -400,7 +403,6 @@ exports.acceptApplicants= function (req,res)
     .then(res.send(true))
     .catch(err=> console.log(err));
 }
-
 exports.rejectApplicants= function (req,res)
 {
     const ID=req.params.id;
@@ -410,6 +412,53 @@ exports.rejectApplicants= function (req,res)
     .catch(err=> console.log(err));
 }
 
+exports.launchVolunteerOrDonationCampaign= async function (req,res)
+{
+    const orgUsername= req.params.id;
+    const name = req.body.name;
+    const status = "upcoming"
+    const address = req.body.address;
+    const description = req.body.description;
+    let process=req.body.process;
+    const startDate = req.body.StartDate;
+    let endDate = req.body.EndDate;
+    const progress = 0;
+    const target = req.body.target;
+    let image = req.body.image;
+    const dontationTypeName = req.body.DonationType;
+    let QuizLink=req.body.QuizLink;
+    console.log(orgUsername)
+
+    Campaign.getCampaignDonationTypeIDfromName(dontationTypeName).then(([ids])=>{
+        const dontationTypeID= ids[0].ID;
+        if(QuizLink==null)
+        {
+            QuizLink="Not Found";
+        }
+        if(image==null)
+        {
+            image="Not Found";
+        }
+        // if(endDate==null)
+        // {
+        //     endDate="Not Found";
+        // }
+        if(process==null)
+        {
+            process="Not Found";
+        }
+        const camp=new Campaign(name,status,orgUsername,null,address,description,process,startDate,endDate,progress,target,image,dontationTypeID,QuizLink);
+        camp.addVolunteeringOrDonationCampaign().then(function([result]){
+            if(result['insertId'])
+            {
+                Campaign.addCampaignToEmbedCampaign(result['insertId']).then(()=>{
+                    res.send('Done');
+                }).catch(err=>console.log(err));
+            }
+        }).catch(err=>console.log(err));
+    }) 
+}   
+
 exports.getOrgStatus =function(req,res)
 {
     const username=req.params.id;
@@ -418,7 +467,6 @@ exports.getOrgStatus =function(req,res)
         res.json(status[0].request)
         console.log(status[0].request)
     })
-
 }
 
 
